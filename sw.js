@@ -1,5 +1,5 @@
-/* FitLife AI Workout Coach — offline cache (v1) */
-var CACHE_NAME = "fitlife-coach-v1";
+/* FitLife AI Workout Coach — offline cache (v2) */
+var CACHE_NAME = "fitlife-coach-v2";
 var CORE_FILES = [
   "./",
   "./index.html",

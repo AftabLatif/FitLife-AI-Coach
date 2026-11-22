@@ -186,6 +186,53 @@ footer a{font-weight:700}
 .ob-nav{display:flex;gap:10px;margin-top:20px}
 .ob-nav .btn{flex:1}
 .ob-skip{display:block;margin:14px auto 0;font-size:13.5px;color:var(--muted);font-weight:600;text-decoration:underline}
+/* v1.1 — weight tracker, challenge, celebration, share, reminder */
+.rem-banner{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.wt-head{display:flex;align-items:center;gap:14px}
+.wt-ring{position:relative;width:84px;height:84px;flex-shrink:0}
+.wt-ring svg{transform:rotate(-90deg)}
+.wt-ring .wt-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wt-ring .wt-val b{font-size:19px;color:var(--teal)}
+.wt-ring .wt-val span{font-size:10.5px;color:var(--muted)}
+.wt-chart{display:flex;align-items:flex-end;gap:6px;height:76px;padding-top:6px}
+.wt-chart .wt-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.wt-chart .wt-bar{width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--teal-mid),var(--teal));min-height:4px}
+.wt-chart .wt-col span{font-size:10.5px;color:var(--muted);font-weight:600}
+.week-dots{display:flex;gap:6px;margin-top:10px}
+.week-dots .wd{flex:1;text-align:center}
+.week-dots .wd i{display:block;width:12px;height:12px;border-radius:50%;background:#dfe7e3;margin:0 auto 4px}
+.week-dots .wd.done i{background:var(--teal)}
+.week-dots .wd b{display:block;font-size:12px}
+.week-dots .wd span{display:block;font-size:10.5px;color:var(--muted)}
+.chal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px}
+.chal-day{aspect-ratio:1;border-radius:12px;border:1.5px solid var(--line);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted)}
+.chal-day small{font-size:9.5px;font-weight:600}
+.chal-day.today{border-color:var(--teal);color:var(--teal);box-shadow:0 0 0 2px var(--teal-light)}
+.chal-day.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.chal-day.rest{background:#f4f6f5}
+.chal-bar{height:10px;background:#dfe7e3;border-radius:99px;overflow:hidden;margin:10px 0}
+.chal-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-mid))}
+.celeb-flame{width:150px;height:150px;margin:6px auto 14px;border-radius:50%;background:linear-gradient(160deg,var(--teal-mid),var(--teal-dark));display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 10px 28px rgba(10,110,87,.35)}
+.celeb-flame .fl{font-size:46px;line-height:1}
+.celeb-flame b{font-size:48px;line-height:1.05}
+.celeb-best{color:var(--muted);font-size:15px;margin:2px 0 14px}
+.celeb-best b{color:var(--teal)}
+.celeb-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:#f4f6f5;border-radius:14px;padding:12px 8px;margin-bottom:12px}
+.celeb-week .cw{text-align:center}
+.celeb-week .cw span{display:block;font-size:11px;font-weight:700;color:var(--muted)}
+.celeb-week .cw b{display:flex;align-items:center;justify-content:center;width:34px;height:34px;margin:5px auto 0;border-radius:50%;font-size:15px}
+.celeb-week .cw.done b{background:var(--teal);color:#fff}
+.celeb-week .cw.today b{box-shadow:0 0 0 2px var(--teal)}
+.celeb-week .cw.future{opacity:.45}
+.celeb-msg{font-size:15px;color:var(--ink);margin-bottom:4px}
+.celeb-chal{font-size:13.5px;color:var(--teal);font-weight:700;margin-bottom:6px}
+.share-row{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:12px}
+.share-row a,.share-row button{width:100%}
+.plan-card-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.slider-lvl{text-align:center;padding:6px 0 2px}
+.slider-lvl .lvl-big{font-size:22px;font-weight:800;color:var(--teal)}
+.slider-lvl p{color:var(--muted);font-size:13.5px;margin-top:3px}
+.slider-ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -209,6 +256,10 @@ footer a{font-weight:700}
 <section class="view active" id="view-home">
   <h2>Good to see you back</h2>
   <p class="sub">Your coach is ready when you are.</p>
+  <div class="notice rem-banner hidden" id="reminderBanner">
+    <span>⏰ <b>Time for today's workout</b> — you haven't trained yet today.</span>
+    <span style="display:flex;gap:8px;flex-shrink:0"><button class="btn small" onclick="reminderStart()">Start</button><button class="btn small ghost" onclick="reminderDismiss()">Not now</button></span>
+  </div>
   <div class="card">
     <div class="ring-wrap">
       <div class="ring">
@@ -230,6 +281,7 @@ footer a{font-weight:700}
     <div class="stat"><div class="num" id="statWorkouts">0</div><div class="lbl">Workouts done</div></div>
     <div class="stat"><div class="num" id="statMinutes">0</div><div class="lbl">Minutes trained</div></div>
   </div>
+  <div class="card" id="challengeCard"></div>
   <div class="card">
     <h3>This week</h3>
     <div class="week-bars" id="weekBars"></div>
@@ -252,6 +304,7 @@ footer a{font-weight:700}
 <section class="view" id="view-plan">
   <h2>AI Workout Plan Generator</h2>
   <p class="sub">Answer 5 questions — get a full weekly plan built from the FitLife exercise library.</p>
+  <div id="planCards"></div>
   <div class="card">
     <div class="field"><label>Your goal</label>
       <div class="chips" id="goalChips">
@@ -297,9 +350,14 @@ footer a{font-weight:700}
   <div class="chips" style="margin-bottom:14px">
     <button class="chip on" id="tabBuiltIn" onclick="switchWkTab('builtin')">Built-in workouts</button>
     <button class="chip" id="tabLibrary" onclick="switchWkTab('library')">Exercise library</button>
+    <button class="chip" id="tabChallenge" onclick="switchWkTab('challenge')">🏆 30-day challenge</button>
   </div>
   <div id="builtinList"></div>
+  <div id="challengePane" class="hidden">
+    <div class="card" id="challengeFull"></div>
+  </div>
   <div id="libraryPane" class="hidden">
+    <div id="libFilterNote"></div>
     <div class="card">
       <div class="field" style="margin-bottom:10px">
         <input type="text" id="libSearch" placeholder="Search exercises… e.g. plank, squat" oninput="renderLibrary()">
@@ -368,6 +426,7 @@ footer a{font-weight:700}
 <section class="view" id="view-log">
   <h2>Your progress</h2>
   <p class="sub">Every session you finish is saved on this device.</p>
+  <div class="card" id="weightCard"></div>
   <div class="stats">
     <div class="stat"><div class="num" id="logStreak">0</div><div class="lbl">Day streak</div></div>
     <div class="stat"><div class="num" id="logWorkouts">0</div><div class="lbl">Workouts</div></div>
@@ -377,6 +436,8 @@ footer a{font-weight:700}
     <h3>Last 7 days</h3>
     <div class="week-bars" id="logWeekBars"></div>
   </div>
+  <div class="card" id="progressCard"></div>
+  <div class="card" id="reminderCard"></div>
   <div class="card">
     <h3>Workout history</h3>
     <div id="logList"></div>
@@ -409,11 +470,13 @@ footer a{font-weight:700}
     <div style="width:100%">
       <div class="progress"><i id="plProg" style="width:0%"></i></div>
       <div class="next-box" id="plNext">Up next: —</div>
+      <div class="share-row hidden" id="shareRow"></div>
       <ul class="step-list" id="plSteps"></ul>
     </div>
   </div>
   <div class="player-controls">
     <button class="btn ghost" id="plPauseBtn" onclick="togglePause()">⏸ Pause</button>
+    <button class="btn ghost" id="plAudioBtn" onclick="toggleAudio()">🔊 Voice</button>
     <button class="btn ghost" onclick="skipStep()">Skip ⏭</button>
     <button class="btn warn" onclick="endWorkout(false)">End</button>
   </div>
@@ -431,6 +494,19 @@ footer a{font-weight:700}
       <button class="btn" id="obNext" onclick="obGo(1)">Next →</button>
     </div>
     <button class="ob-skip" id="obSkip" onclick="obSkip()">Skip for now</button>
+  </div>
+</div>
+
+<!-- ============ STREAK CELEBRATION ============ -->
+<div id="streakCeleb" class="onboard hidden" role="dialog" aria-modal="true" aria-label="Day streak">
+  <div class="ob-card" style="text-align:center">
+    <div class="celeb-flame"><span class="fl">🔥</span><b id="celebNum">1</b></div>
+    <h2 id="celebTitle">Day Streak</h2>
+    <p class="celeb-best" id="celebBest">Best: 1 day</p>
+    <div class="celeb-week" id="celebWeek"></div>
+    <p class="celeb-msg" id="celebMsg"></p>
+    <p class="celeb-chal hidden" id="celebChal"></p>
+    <div class="ob-nav"><button class="btn" onclick="closeCelebration()">Done</button></div>
   </div>
 </div>
 
@@ -541,7 +617,7 @@ function restSecs(){var v=parseInt(localStorage.getItem(LS_REST)||"60",10);retur
 function setRestSecs(v){try{localStorage.setItem(LS_REST,String(v))}catch(e){}}
 function logSession(name,minutes,reps){
   var l=loadLog(); l.push({date:new Date().toISOString().slice(0,10),name:name,minutes:minutes,reps:reps||0,ts:Date.now()});
-  saveLog(l); renderHome(); renderLog();
+  saveLog(l); markChallengeDone(new Date().toISOString().slice(0,10)); renderHome(); renderLog();
 }
 function dayKey(d){return d.toISOString().slice(0,10)}
 function streak(){
@@ -583,8 +659,8 @@ function showView(name){
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.view===name)});
   window.scrollTo({top:0});
   if(name==="home")renderHome();
-  if(name==="workouts"){renderBuiltIn(); renderLibrary();}
-  if(name==="log")renderLog();
+  if(name==="workouts"){renderBuiltIn(); renderLibrary(); renderChallengeGrid();}
+  if(name==="log"){renderLog(); renderWeight(); renderReminderSettings();}
   if(name==="plan"&&!$("planOut").innerHTML)renderSavedPlan();
   if(name==="coach")stopCoach();
 }
@@ -613,6 +689,7 @@ function renderHome(){
     var lb=el("div","day",d.label); col.appendChild(lb);
     bars.appendChild(col);
   });
+  renderChallengeCard(); maybeShowReminder();
 }
 /* ================= LOG ================= */
 function renderLog(){
@@ -628,7 +705,7 @@ function renderLog(){
   });
   var l=loadLog().slice().sort(function(a,b){return b.ts-a.ts});
   var list=$("logList"); list.innerHTML="";
-  if(!l.length){list.appendChild(el("div","empty","No sessions yet. Finish a workout and it will show up here.")); return}
+  if(!l.length){list.appendChild(el("div","empty","No sessions yet. Finish a workout and it will show up here.")); renderProgress(); return}
   var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   l.slice(0,30).forEach(function(s){
     var d=new Date(s.date+"T12:00:00");
@@ -638,11 +715,504 @@ function renderLog(){
       '<span style="font-size:20px">✓</span>';
     list.appendChild(row);
   });
+  renderProgress();
 }
 function clearLog(){if(confirm("Clear all workout history on this device?")){saveLog([]); renderHome(); renderLog(); toast("History cleared")}}
+/* ================= v1.1 — WEIGHT TRACKER ================= */
+var LS_WEIGHT="fitlife_coach_weight_v1";
+var wtFormOpen=false;
+function loadWeight(){try{var w=JSON.parse(localStorage.getItem(LS_WEIGHT)||"null"); if(w&&w.entries)return w; return {entries:[],target:null}}catch(e){return {entries:[],target:null}}}
+function saveWeight(w){try{localStorage.setItem(LS_WEIGHT,JSON.stringify(w))}catch(e){}}
+function kgToLb(kg){return Math.round(kg*2.20462)}
+function currentWeight(){var w=loadWeight(); return w.entries.length?w.entries[w.entries.length-1].kg:null}
+function toggleWeightForm(open){wtFormOpen=open; renderWeight()}
+function saveWeightEntry(){
+  var kg=parseFloat($("wtInput").value), tg=parseFloat($("wtTarget").value);
+  if(isNaN(kg)||kg<30||kg>300){toast("Enter a weight between 30 and 300 kg"); return}
+  var w=loadWeight(), today=dayKey(new Date());
+  var found=false;
+  w.entries=w.entries.map(function(e){if(e.date===today){e.kg=kg; found=true} return e});
+  if(!found)w.entries.push({date:today,kg:kg});
+  if(!isNaN(tg)&&tg>=30&&tg<=300)w.target=tg;
+  saveWeight(w); wtFormOpen=false; renderWeight();
+  toast("Weight saved: "+kg+" kg");
+}
+function renderWeight(){
+  var card=$("weightCard"); if(!card)return;
+  var w=loadWeight(), cur=currentWeight();
+  var last7=w.entries.slice(-7);
+  var toGo=(cur!=null&&w.target!=null)?Math.round((cur-w.target)*10)/10:null;
+  var start=w.entries.length?w.entries[0].kg:null;
+  var prog=1;
+  if(cur!=null&&w.target!=null&&start!=null&&start>w.target){prog=Math.max(0,Math.min(1,(start-cur)/(start-w.target)))}
+  var html='<div class="wt-head"><div class="wt-ring"><svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="none" stroke="#e2e9e6" stroke-width="8"/><circle cx="42" cy="42" r="34" fill="none" stroke="#0a6e57" stroke-width="8" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="'+(213.6*(1-prog)).toFixed(1)+'"/></svg><div class="wt-val"><b>'+(cur!=null?cur+" kg":"—")+'</b><span>'+(cur!=null?"≈ "+kgToLb(cur)+" lb":"no entries")+'</span></div></div>'+
+    '<div style="flex:1;min-width:0"><h3>Weight tracker</h3>'+
+    (w.target!=null?('<p>Goal: <b>'+w.target+' kg</b> (≈ '+kgToLb(w.target)+' lb)'+(toGo!=null?(toGo>0?' · <b>'+toGo+' kg to go</b>':' · <b>Goal reached 🎉</b>'):'')+'</p>'):'<p>Log your weight and set a goal to see your progress here.</p>')+
+    '<div style="margin-top:10px"><button class="btn small" onclick="toggleWeightForm(true)">⚖️ Update weight</button></div></div></div>';
+  if(last7.length>=2){
+    var vals=last7.map(function(e){return e.kg});
+    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), span=(mx-mn)||1;
+    html+='<div class="wt-chart">'+last7.map(function(e){
+      var h=Math.round(12+((e.kg-mn)/span)*48);
+      var d=new Date(e.date+"T12:00:00");
+      return '<div class="wt-col"><span>'+e.kg+'</span><div class="wt-bar" style="height:'+h+'px"></div><span>'+d.getDate()+'/'+(d.getMonth()+1)+'</span></div>';
+    }).join("")+'</div>';
+  } else if(last7.length===1){
+    html+='<p style="margin-top:10px">One entry logged. Log again another day to see your trend.</p>';
+  } else {
+    html+='<p style="margin-top:10px">No weight entries yet — tap “Update weight” to log your first one.</p>';
+  }
+  var wk=thisWeek();
+  html+='<div class="week-dots">'+wk.map(function(d){
+    var kcal=d.mins*6;
+    return '<div class="wd'+(d.mins>0?" done":"")+'"><i></i><b>'+d.label+'</b><span>'+d.mins+' min</span><span>~'+kcal+' kcal</span></div>';
+  }).join("")+'</div><p style="font-size:12px;color:var(--muted);margin-top:6px">Calories are estimated (~6 kcal per training minute).</p>';
+  html+='<div id="wtForm" class="'+(wtFormOpen?"":"hidden")+'" style="margin-top:12px"><div class="field"><label>Today\'s weight (kg)</label><input type="number" id="wtInput" step="0.1" min="30" max="300" value="'+(cur!=null?cur:"")+'" placeholder="e.g. 82.5"></div><div class="field"><label>Goal weight (kg)</label><input type="number" id="wtTarget" step="0.5" min="30" max="300" value="'+(w.target!=null?w.target:"")+'" placeholder="e.g. 75"></div><div class="btn-row"><button class="btn small" onclick="saveWeightEntry()">Save weight</button><button class="btn small ghost" onclick="toggleWeightForm(false)">Cancel</button></div></div>';
+  card.innerHTML=html;
+}
+/* ================= v1.1 — 30-DAY CHALLENGE ================= */
+var LS_CHAL="fitlife_coach_challenge_v1";
+var CHAL_REST_DAYS=[7,14,21,28];
+function loadChal(){try{var c=JSON.parse(localStorage.getItem(LS_CHAL)||"null"); if(c&&c.start)return c; return null}catch(e){return null}}
+function saveChal(c){try{localStorage.setItem(LS_CHAL,JSON.stringify(c))}catch(e){}}
+function chalDayNum(dateStr){var c=loadChal(); if(!c)return 0; var s=new Date(c.start+"T12:00:00"), d=new Date(dateStr+"T12:00:00"); return Math.floor((d-s)/86400000)+1}
+function chalDayInfo(n){
+  if(n<1||n>30)return null;
+  if(CHAL_REST_DAYS.indexOf(n)>=0)return {rest:true,diff:"Rest"};
+  var order=["apt-cardio","ab10","fullbody","pushup-prog"];
+  var w=null; WORKOUTS.forEach(function(x){if(x.id===order[(n-1)%4])w=x});
+  return {rest:false,wid:order[(n-1)%4],name:w?w.name:"",diff:n<=10?"Easy":(n<=20?"Moderate":"Hard"),mins:w?w.mins:0};
+}
+function startChallenge(){
+  saveChal({start:dayKey(new Date()),done:[]});
+  toast("Challenge started — Day 1 today!");
+  renderChallengeCard(); renderChallengeGrid();
+}
+function restartChallenge(){if(confirm("Restart the 30-day challenge from Day 1?")){saveChal({start:dayKey(new Date()),done:[]}); renderChallengeCard(); renderChallengeGrid();}}
+function markChallengeDone(dateStr){
+  var c=loadChal(); if(!c)return;
+  var n=chalDayNum(dateStr); if(n<1||n>30)return;
+  var info=chalDayInfo(n); if(!info||info.rest)return;
+  if(c.done.indexOf(n)<0){c.done.push(n); saveChal(c);}
+}
+function challengeToday(){var c=loadChal(); if(!c)return {n:0}; var n=chalDayNum(dayKey(new Date())); return {n:n,info:chalDayInfo(n)}}
+function renderChallengeCard(){
+  var card=$("challengeCard"); if(!card)return;
+  var c=loadChal();
+  if(!c){
+    card.innerHTML='<h3>🏆 30-Day Home Workout Challenge</h3><p>One short workout a day for 30 days — rest days included. Finish it and you will have a real habit.</p><div style="margin-top:12px"><button class="btn" onclick="startChallenge()">Start the 30-day challenge</button></div>';
+    return;
+  }
+  var t=challengeToday();
+  var done=c.done.length;
+  var pct=Math.round(done/30*100);
+  var html='<h3>🏆 30-Day Home Workout Challenge</h3>';
+  if(t.n>30){
+    html+='<p>You finished all 30 days — amazing work! 🎉</p><div class="chal-bar"><i style="width:100%"></i></div><p><b>30 / 30 days done</b></p><div style="margin-top:12px"><button class="btn" onclick="restartChallenge()">Start again</button></div>';
+  } else {
+    var info=t.info;
+    html+='<p>Day '+t.n+' of 30 · <b>'+done+' days done</b></p><div class="chal-bar"><i style="width:'+pct+'%"></i></div>';
+    if(info&&info.rest){
+      html+='<p>😌 Today is a rest day — stretch, walk, or try a 2-minute quick workout.</p><div class="btn-row" style="margin-top:12px"><button class="btn small" onclick="showView(\'workouts\');switchWkTab(\'challenge\')">View all 30 days</button></div>';
+    } else if(info){
+      html+='<p>Today: <b>'+esc(info.name)+'</b> · '+info.mins+' min · '+info.diff+'</p><div class="btn-row" style="margin-top:12px"><button class="btn small" onclick="startChallengeDay()">▶ Start today\'s session</button><button class="btn small ghost" onclick="showView(\'workouts\');switchWkTab(\'challenge\')">All 30 days</button></div>';
+    }
+  }
+  card.innerHTML=html;
+}
+function startChallengeDay(){
+  var t=challengeToday(); if(!t.info||t.info.rest){toast("Today is a rest day — enjoy it!"); return}
+  startWorkout(t.info.wid);
+}
+function renderChallengeGrid(){
+  var box=$("challengeFull"); if(!box)return;
+  var c=loadChal();
+  if(!c){
+    box.innerHTML='<h3>🏆 30-Day Home Workout Challenge</h3><p>One short workout a day for 30 days — rest days included. Your 4 built-in workouts rotate through the month, getting harder each week.</p><div style="margin-top:12px"><button class="btn" onclick="startChallenge()">Start the 30-day challenge</button></div>';
+    return;
+  }
+  var t=challengeToday(), done=c.done.length;
+  var html='<h3>🏆 30-Day Home Workout Challenge</h3><p>Day '+(t.n>30?30:Math.max(1,t.n))+' of 30 · <b>'+done+' days done</b> · Tap any day to start its workout.</p><div class="chal-bar"><i style="width:'+Math.round(done/30*100)+'%"></i></div><div class="chal-grid">';
+  for(var n=1;n<=30;n++){
+    var info=chalDayInfo(n);
+    var cls="chal-day";
+    if(c.done.indexOf(n)>=0)cls+=" done";
+    else if(n===t.n)cls+=" today";
+    else if(info&&info.rest)cls+=" rest";
+    var lbl=c.done.indexOf(n)>=0?"✓":(info&&info.rest?"💤":info?info.diff:"");
+    html+='<button class="'+cls+'" onclick="tapChallengeDay('+n+')">'+n+'<small>'+lbl+'</small></button>';
+  }
+  html+='</div><p style="margin-top:12px">Week 1–2: Easy · Week 3: Moderate · Week 4: Hard. Days 7, 14, 21 and 28 are rest days.</p><div style="margin-top:10px"><button class="btn ghost small" onclick="restartChallenge()">Restart challenge</button></div>';
+  box.innerHTML=html;
+}
+function tapChallengeDay(n){
+  var c=loadChal(); if(!c)return;
+  var info=chalDayInfo(n); if(!info)return;
+  if(info.rest){toast("Day "+n+" is a rest day — stretch or walk."); return}
+  startWorkout(info.wid);
+}
+/* ================= v1.1 — STREAK CELEBRATION ================= */
+function bestStreak(){
+  var l=loadLog(); if(!l.length)return 0;
+  var days={}; l.forEach(function(s){days[s.date]=1});
+  var keys=Object.keys(days).sort();
+  var best=0, run=1;
+  for(var i=1;i<keys.length;i++){
+    var prev=new Date(keys[i-1]+"T12:00:00"), cur=new Date(keys[i]+"T12:00:00");
+    if((cur-prev)/86400000===1){run++} else {run=1}
+    if(run>best)best=run;
+  }
+  return Math.max(best, keys.length?1:0);
+}
+function celebMessage(st){
+  if(st===1)return "Day one is done — the hardest step is behind you.";
+  if(st<7)return "Keep it going — small steps every day add up.";
+  if(st===7)return "A full week! Your routine is becoming a habit.";
+  if(st<14)return "One week strong — you are building something real.";
+  if(st===14)return "Two weeks strong — your consistency is showing.";
+  if(st<30)return "Week after week — this is how change happens.";
+  if(st===30)return "Thirty days of showing up. That is real change.";
+  return "Incredible — "+st+" days in a row. Keep the flame alive.";
+}
+function showCelebration(st){
+  var best=bestStreak();
+  $("celebNum").textContent=st;
+  $("celebTitle").textContent="Day Streak";
+  $("celebBest").innerHTML="Best: <b>"+best+" day"+(best===1?"":"s")+"</b>";
+  var today=new Date(); var start=new Date(today); start.setDate(today.getDate()-today.getDay());
+  var wk=$("celebWeek"); wk.innerHTML="";
+  var days={}; loadLog().forEach(function(s){days[s.date]=1});
+  var letters=["S","M","T","W","T","F","S"];
+  for(var i=0;i<7;i++){
+    var d=new Date(start); d.setDate(start.getDate()+i);
+    var cell=el("div","cw"+(days[dayKey(d)]?" done":"")+(i===today.getDay()?" today":"")+(d>today?" future":""));
+    cell.innerHTML="<span>"+letters[i]+"</span><b>"+(days[dayKey(d)]?"✓":d.getDate())+"</b>";
+    wk.appendChild(cell);
+  }
+  $("celebMsg").textContent=celebMessage(st);
+  var chal=$("celebChal");
+  var c=loadChal();
+  if(c){
+    var n=chalDayNum(dayKey(new Date()));
+    if(n>=1&&n<=30&&c.done.indexOf(n)>=0){chal.textContent="🏆 Challenge Day "+n+" of 30 complete — "+c.done.length+" of 30 days done."; chal.classList.remove("hidden");}
+    else chal.classList.add("hidden");
+  } else chal.classList.add("hidden");
+  $("streakCeleb").classList.remove("hidden");
+  document.body.style.overflow="hidden";
+}
+function closeCelebration(){
+  $("streakCeleb").classList.add("hidden");
+  document.body.style.overflow="";
+  renderHome();
+}
+/* ================= v1.1 — SHARE ================= */
+function showShareRow(title,mins){
+  var row=$("shareRow"); if(!row)return;
+  var text="I just finished "+title+" ("+mins+" min) with the FitLife AI Workout Coach — free, no sign-up: https://aftablatif.github.io/FitLife-AI-Coach/";
+  var wa="https://wa.me/?text="+encodeURIComponent(text);
+  var bs="https://bsky.app/intent/compose?text="+encodeURIComponent(text);
+  row.innerHTML='<a class="btn small" href="'+wa+'" target="_blank" rel="noopener">💬 Share on WhatsApp</a>'+
+    '<a class="btn small ghost" href="'+bs+'" target="_blank" rel="noopener">🦋 Share on Bluesky</a>'+
+    '<button class="btn small ghost" id="copyShareBtn">📋 Copy message</button>';
+  row.classList.remove("hidden");
+  var cb=$("copyShareBtn");
+  if(cb)cb.onclick=function(){
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast("Copied — paste it anywhere")},function(){toast("Copy not available")});}
+    else toast("Copy not available on this browser");
+  };
+}
+/* ================= v1.1 — DAILY REMINDER ================= */
+var LS_REMINDER="fitlife_coach_reminder_v1";
+function loadReminder(){try{var r=JSON.parse(localStorage.getItem(LS_REMINDER)||"null"); if(r)return r; return {enabled:false,time:"18:00",dismissed:""}}catch(e){return {enabled:false,time:"18:00",dismissed:""}}}
+function saveReminder(r){try{localStorage.setItem(LS_REMINDER,JSON.stringify(r))}catch(e){}}
+function trainedToday(){var t=dayKey(new Date()); return loadLog().some(function(s){return s.date===t})}
+function maybeShowReminder(){
+  var b=$("reminderBanner"); if(!b)return;
+  var r=loadReminder();
+  if(!r.enabled||trainedToday()||r.dismissed===dayKey(new Date())){b.classList.add("hidden"); return}
+  var now=new Date(), parts=r.time.split(":");
+  var hh=parseInt(parts[0],10); if(isNaN(hh))hh=18;
+  var mm=parseInt(parts[1],10); if(isNaN(mm))mm=0;
+  var when=new Date(now); when.setHours(hh,mm,0,0);
+  if(now<when){b.classList.add("hidden"); return}
+  b.classList.remove("hidden");
+  if("Notification" in window&&Notification.permission==="granted"&&document.hidden){
+    try{new Notification("FitLife Coach",{body:"Time for today's workout — you haven't trained yet today."})}catch(e){}
+  }
+}
+function reminderDismiss(){
+  var r=loadReminder(); r.dismissed=dayKey(new Date()); saveReminder(r);
+  $("reminderBanner").classList.add("hidden");
+}
+function reminderStart(){
+  $("reminderBanner").classList.add("hidden");
+  showView("workouts");
+}
+function renderReminderSettings(){
+  var card=$("reminderCard"); if(!card)return;
+  var r=loadReminder();
+  card.innerHTML='<h3>⏰ Daily reminder</h3><p>Get a reminder in the app when it is time to train (only if you have not trained yet that day).</p>'+
+    '<div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">'+
+    '<label style="display:flex;gap:8px;align-items:center;font-weight:700;font-size:14px"><input type="checkbox" id="remToggle" '+(r.enabled?"checked":"")+' style="width:20px;height:20px;accent-color:var(--teal)"> Remind me daily</label>'+
+    '<input type="time" id="remTime" value="'+esc(r.time)+'" style="padding:10px 12px;border:1.5px solid var(--line);border-radius:12px">'+
+    '<button class="btn small" onclick="saveReminderSettings()">Save</button></div>'+
+    '<p style="font-size:12.5px;color:var(--muted);margin-top:10px">A reminder banner appears when you open the app after your chosen time. Push notifications need a server, so this app reminds you on open instead — it never tracks you in the background.</p>';
+}
+function saveReminderSettings(){
+  var r=loadReminder();
+  r.enabled=$("remToggle").checked;
+  r.time=$("remTime").value||"18:00";
+  saveReminder(r);
+  if(r.enabled&&"Notification" in window&&Notification.permission==="default"){
+    Notification.requestPermission().catch(function(){});
+  }
+  renderReminderSettings();
+  toast(r.enabled?"Daily reminder on — "+r.time:"Daily reminder off");
+}
+/* ================= v1.1 — PLAN CARDS ================= */
+var PLAN_CARDS=[
+ {name:"Easy Start Fat Burn",desc:"Gentle full-body sessions that burn fat without exhausting you. A kind first plan.",goal:"lose",level:"beginner",days:3,equip:"none",len:15,meta:["Lose Weight","Beginner","3 levels","10–30 min"]},
+ {name:"Dumbbell Strength Builder",desc:"Dumbbell track: strength sessions that build real muscle at home, one level at a time.",goal:"muscle",level:"intermediate",days:4,equip:"dumbbells",len:30,meta:["Build Muscle","Intermediate","3 levels","15–30 min"]},
+ {name:"Everyday Energy",desc:"Short balanced sessions for busy days — a little strength, a little cardio, every time.",goal:"fitness",level:"beginner",days:3,equip:"none",len:10,meta:["General Fitness","All levels","3 levels","10–15 min"]}
+];
+function renderPlanCards(){
+  var wrap=$("planCards"); if(!wrap)return;
+  wrap.innerHTML="";
+  var head=el("div","card");
+  head.innerHTML="<h3>Popular plans</h3><p>Tap one to load it into the generator below — then press Generate.</p>";
+  wrap.appendChild(head);
+  PLAN_CARDS.forEach(function(pc){
+    var card=el("div","wk-card");
+    card.innerHTML='<div class="wk-ico">✦</div><div class="wk-info"><h3>'+esc(pc.name)+'</h3><p>'+esc(pc.desc)+'</p><div class="plan-card-meta">'+pc.meta.map(function(m){return '<span class="tag">'+esc(m)+'</span>'}).join("")+'</div></div>';
+    var btn=el("button","btn small","Use plan"); btn.style.flexShrink="0";
+    btn.onclick=function(){usePlanCard(pc)};
+    card.appendChild(btn); wrap.appendChild(card);
+  });
+}
+function usePlanCard(pc){
+  setChip("goalChips",pc.goal); setChip("levelChips",pc.level); setChip("equipChips",pc.equip);
+  $("daysRange").value=pc.days; $("daysVal").textContent=pc.days+" days";
+  setChip("lenChips",String(pc.len));
+  generatePlan();
+}
+/* ================= v1.1 — QUICK WORKOUTS ================= */
+var QUICK_WORKOUTS=[
+ {id:"q-wakeup",name:"2-Minute Wake-Up",desc:"Shake off sleep — gentle marching and shoulder rolls.",icon:"🌅",steps:[{id:"march-place",seconds:60},{id:"shoulder-roll",seconds:60}]},
+ {id:"q-core",name:"2-Minute Core Blast",desc:"Plank, bicycle crunch and climbers — a fast core hit.",icon:"⚡",steps:[{id:"plank",seconds:40},{id:"bicycle-crunch",seconds:40},{id:"mountain-climber",seconds:40}]},
+ {id:"q-desk",name:"4-Minute Desk Break",desc:"Undo a long sit — stretch, squat and wake your legs up.",icon:"🪑",steps:[{id:"shoulder-roll",seconds:60},{id:"squat",seconds:40},{id:"calf-raise",seconds:40},{id:"plank",seconds:40},{id:"inchworm",seconds:60}]},
+ {id:"q-energy",name:"5-Minute Energy Boost",desc:"Fast feet and shadow boxing to lift your energy.",icon:"🔋",steps:[{id:"march-place",seconds:60},{id:"high-knees",seconds:40},{id:"step-jack",seconds:40},{id:"shadow-boxing",seconds:40},{id:"mountain-climber",seconds:40},{id:"plank",seconds:40}]},
+ {id:"q-full",name:"7-Minute Full-Body Express",desc:"Seven moves, head to toe — the whole body in seven minutes.",icon:"💪",steps:[{id:"march-place",seconds:60},{id:"squat",seconds:60},{id:"incline-pushup",seconds:60},{id:"reverse-lunge",seconds:60},{id:"plank",seconds:60},{id:"glute-bridge",seconds:60},{id:"shoulder-roll",seconds:60}]}
+];
+function quickMins(q){var s=0; q.steps.forEach(function(st){s+=st.seconds||0}); return Math.max(1,Math.round(s/60))}
+function startQuick(qid){
+  var q=null; QUICK_WORKOUTS.forEach(function(x){if(x.id===qid)q=x});
+  if(!q)return;
+  startPlayer(q.name+" ⚡",quickMins(q),expandSteps(q.steps));
+}
+function renderQuickWorkouts(wrap){
+  renderSessionGroup(wrap,"quickGroup","⚡ 2-Minute Quick Workouts","Short sessions from the exercise library — 2 to 7 minutes, anytime, anywhere. Perfect when a full workout will not fit your day.",QUICK_WORKOUTS,function(id){startQuick(id)},quickMins);
+}
+/* ================= v2 — SESSION GROUPS (quick / dumbbell / stretch) ================= */
+function stepsMins(q){
+  var steps=Array.isArray(q)?q:q.steps;
+  var ex=expandSteps(steps), s=0;
+  ex.forEach(function(st){s+=st.type==="time"?st.seconds:45});
+  return Math.max(1,Math.round(s/60));
+}
+function renderSessionGroup(wrap,gid,title,desc,list,startFn,minsFn){
+  var g=el("div"); g.id=gid;
+  var head=el("div","card");
+  head.innerHTML="<h3>"+esc(title)+"</h3><p>"+esc(desc)+"</p>";
+  g.appendChild(head);
+  list.forEach(function(q){
+    var mins=(minsFn||quickMins)(q);
+    var card=el("div","wk-card");
+    card.innerHTML='<div class="wk-ico">'+q.icon+'</div><div class="wk-info"><h3>'+esc(q.name)+'</h3><p>'+esc(q.desc)+'</p><div class="wk-meta"><span class="tag">⏱ '+mins+' min</span><span class="tag grey">'+q.steps.length+' moves</span></div></div>';
+    var btn=el("button","btn small","Start"); btn.style.flexShrink="0";
+    btn.onclick=function(){startFn(q.id)};
+    card.appendChild(btn); g.appendChild(card);
+  });
+  wrap.appendChild(g);
+}
+function startSessionById(list,qid){
+  var q=null; list.forEach(function(x){if(x.id===qid)q=x});
+  if(!q)return;
+  startPlayer(q.name,stepsMins(q.steps),expandSteps(q.steps));
+}
+var DUMBBELL_WORKOUTS=[
+ {id:"db-full",name:"Dumbbell Full-Body",desc:"Six dumbbell moves, head to toe — a complete strength session.",icon:"🏋️",steps:[
+   {id:"db-goblet-squat",reps:12,sets:3},{id:"db-press",reps:12,sets:3},{id:"db-row",reps:12,sets:3},
+   {id:"db-rdl",reps:12,sets:3},{id:"db-shoulder-press",reps:10,sets:3},{id:"db-curl",reps:12,sets:3}]},
+ {id:"db-upper",name:"Dumbbell Upper Body",desc:"Chest, back, shoulders and arms — all with dumbbells.",icon:"💪",steps:[
+   {id:"db-press",reps:12,sets:3},{id:"db-row",reps:12,sets:3},{id:"db-shoulder-press",reps:10,sets:3},
+   {id:"db-lateral-raise",reps:12,sets:3},{id:"db-curl",reps:12,sets:3},{id:"db-kickback",reps:12,sets:3}]},
+ {id:"db-lower",name:"Dumbbell Lower Body",desc:"Legs and glutes with dumbbells, plus a grip finisher.",icon:"🦵",steps:[
+   {id:"db-goblet-squat",reps:12,sets:3},{id:"db-rdl",reps:12,sets:3},{id:"db-reverse-lunge",reps:10,sets:3},
+   {id:"db-calf-raise",reps:15,sets:2},{id:"db-farmer-carry",seconds:40,sets:2}]}
+];
+var STRETCH_WORKOUTS=[
+ {id:"st-warmup",name:"Morning Warm-Up",desc:"Five minutes to wake your body up — gentle moves, no rush.",icon:"🌅",steps:[{id:"march-place",seconds:60},{id:"shoulder-roll",seconds:60},{id:"inchworm",seconds:60},{id:"squat",seconds:60},{id:"calf-raise",seconds:60}]},
+ {id:"st-cooldown",name:"Cool-Down Stretch",desc:"Six slow minutes to stretch out after training.",icon:"🧘",steps:[{id:"quad-stretch",seconds:60},{id:"hamstring-stretch",seconds:60},{id:"shoulder-roll",seconds:60},{id:"inchworm",seconds:60},{id:"march-place",seconds:60},{id:"calf-raise",seconds:60}]}
+];
+function renderDumbbellWorkouts(wrap){
+  renderSessionGroup(wrap,"dumbbellGroup","🏋️ Dumbbell Track","Dedicated dumbbell sessions — build muscle at home with a pair of dumbbells.",DUMBBELL_WORKOUTS,function(id){startSessionById(DUMBBELL_WORKOUTS,id)},stepsMins);
+}
+function renderStretchWorkouts(wrap){
+  renderSessionGroup(wrap,"stretchGroup","🧘 Stretch & Warm-Up","Slow 5–7 minute sessions to warm up before training or stretch out after it.",STRETCH_WORKOUTS,function(id){startSessionById(STRETCH_WORKOUTS,id)},quickMins);
+}
+/* ================= v2 — COLLECTIONS BY MUSCLE GROUP ================= */
+var COLLECTIONS=[
+ {name:"Strong Core",desc:"Abs and core — planks, crunches and twists.",muscles:["Core"],icon:"🎯"},
+ {name:"Arm Builder",desc:"Biceps, triceps and shoulders for stronger arms.",muscles:["Arms"],icon:"💪"},
+ {name:"Leg Day Basics",desc:"Squats, lunges and bridges for powerful legs.",muscles:["Legs"],icon:"🦵"},
+ {name:"Chest Builder",desc:"Push-ups and presses for a stronger chest.",muscles:["Chest"],icon:"🫁"},
+ {name:"Total Body",desc:"Full-body moves that work everything at once.",muscles:["Full Body"],icon:"🌟"},
+ {name:"Back & Shoulder Strength",desc:"Rows, pulls and presses for a strong back and shoulders.",muscles:["Back","Shoulders"],icon:"🏋️"}
+];
+function collectionCount(c){return EXERCISES.filter(function(ex){return c.muscles.indexOf(ex.muscle)>=0}).length}
+var libFilter=null; /* null | {muscles:[...], label:"..."} */
+function renderCollections(wrap){
+  var g=el("div"); g.id="collectionsGroup";
+  var head=el("div","card");
+  head.innerHTML="<h3>Collections</h3><p>Browse the library by muscle group — tap a collection to see its exercises.</p>";
+  g.appendChild(head);
+  COLLECTIONS.forEach(function(c){
+    var n=collectionCount(c);
+    var card=el("div","wk-card");
+    card.innerHTML='<div class="wk-ico">'+c.icon+'</div><div class="wk-info"><h3>'+esc(c.name)+'</h3><p>'+esc(c.desc)+'</p><div class="wk-meta"><span class="tag">'+n+' exercises</span><span class="tag grey">'+esc(c.muscles.join(" · "))+'</span></div></div>';
+    var btn=el("button","btn small","View"); btn.style.flexShrink="0";
+    btn.onclick=function(){openCollection(c)};
+    card.appendChild(btn); g.appendChild(card);
+  });
+  wrap.appendChild(g);
+}
+function openCollection(c){
+  libFilter={muscles:c.muscles.slice(),label:c.name+" — "+collectionCount(c)+" exercises"};
+  switchWkTab("library");
+  renderLibrary();
+}
+function clearLibFilter(){libFilter=null; renderLibrary();}
+/* ================= v2 — TRENDING / YOU MAY NEED ================= */
+var LS_USAGE="fitlife_coach_ex_usage_v1";
+function loadUsage(){try{return JSON.parse(localStorage.getItem(LS_USAGE)||"{}")}catch(e){return{}}}
+function saveUsage(u){try{localStorage.setItem(LS_USAGE,JSON.stringify(u))}catch(e){}}
+function bumpUsage(exId){var u=loadUsage(); u[exId]=(u[exId]||0)+1; saveUsage(u);}
+function bumpUsageForSteps(steps){
+  var seen={};
+  steps.forEach(function(s){if(s&&s.ex&&!seen[s.ex.id]){seen[s.ex.id]=1; bumpUsage(s.ex.id);}});
+}
+function topUsed(n){
+  var u=loadUsage(), arr=[];
+  Object.keys(u).forEach(function(id){var ex=exById(id); if(ex)arr.push({ex:ex,count:u[id]})});
+  arr.sort(function(a,b){return b.count-a.count});
+  return arr.slice(0,n);
+}
+function renderTrending(wrap){
+  var g=el("div"); g.id="trendingGroup";
+  var top=topUsed(5);
+  var head=el("div","card");
+  if(top.length){
+    head.innerHTML="<h3>🔥 Trending for you</h3><p>Your most-used exercises — based on the workouts you actually finish.</p>";
+  } else {
+    head.innerHTML="<h3>🔥 Trending for you</h3><p>Popular starter moves to try first. Your most-used exercises will show up here once you finish a few workouts.</p>";
+  }
+  g.appendChild(head);
+  var list=top.length?top.map(function(t){return {ex:t.ex,count:t.count}}):[];
+  if(list.length<5){
+    ["pushup","squat","plank","glute-bridge","mountain-climber"].forEach(function(id){
+      if(list.length>=5)return;
+      if(!list.some(function(it){return it.ex.id===id})){var ex=exById(id); if(ex)list.push({ex:ex,count:0});}
+    });
+  }
+  list.forEach(function(item){
+    var ex=item.ex; if(!ex)return;
+    var row=el("div","ex-row");
+    row.innerHTML='<div class="ex-head"><h4><span class="muscle-dot" style="background:'+(MUSCLE_COLORS[ex.muscle]||"#475569")+'"></span>'+esc(ex.name)+'</h4><span class="ex-sets">'+(item.count>0?("Done "+item.count+"×"):"Starter pick")+'</span></div>'+
+      '<p>'+esc(ex.inst)+'</p><p style="color:var(--teal);font-weight:600">'+esc(ex.muscle)+' · Rest '+ex.rest+'s</p>';
+    g.appendChild(row);
+  });
+  wrap.appendChild(g);
+}
+/* ================= v2 — VIDEO FORM GUIDES (own channel only) ================= */
+/* Verified 22 Nov 2026: the FitLife Zone YouTube channel (@FitLifeZoneTV) has NO
+   single-exercise form-guide videos yet (long-form are explainers; Shorts are
+   mixed topics). VIDEO_GUIDES stays empty until a real tutorial is published
+   for an exercise — only then add its video id here. Never link other
+   creators' videos. */
+var VIDEO_GUIDES={};
+function videoGuideHtml(ex){
+  var vid=VIDEO_GUIDES[ex.id];
+  if(vid)return '<p style="margin-top:7px"><a href="https://youtu.be/'+vid+'" target="_blank" rel="noopener">▶ Watch the FitLife video guide</a></p>';
+  return '<p style="font-size:12.5px;color:var(--muted);margin-top:7px">▶ Video guide coming soon — our own FitLife tutorial for this move.</p>';
+}
+/* ================= v2 — PROGRESS CHARTS ================= */
+function renderProgress(){
+  var card=$("progressCard"); if(!card)return;
+  var w=loadWeight();
+  var cutoff=new Date(); cutoff.setDate(cutoff.getDate()-30);
+  var entries=w.entries.filter(function(e){return new Date(e.date+"T12:00:00")>=cutoff});
+  var html="<h3>📈 Progress charts</h3>";
+  if(entries.length>=2){
+    var vals=entries.map(function(e){return e.kg});
+    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), span=(mx-mn)||1;
+    html+='<p>Weight — last 30 days ('+entries.length+' entries)</p><div class="wt-chart">'+entries.map(function(e){
+      var h=Math.round(12+((e.kg-mn)/span)*48);
+      var d=new Date(e.date+"T12:00:00");
+      return '<div class="wt-col"><span>'+e.kg+'</span><div class="wt-bar" style="height:'+h+'px"></div><span>'+d.getDate()+'/'+(d.getMonth()+1)+'</span></div>';
+    }).join("")+'</div>';
+  } else {
+    html+='<p>Weight graph — log your weight on at least 2 days to see your 30-day trend.</p>';
+  }
+  var l=loadLog();
+  var weeks=[];
+  for(var i=3;i>=0;i--){
+    var end=new Date(); end.setDate(end.getDate()-i*7);
+    var start=new Date(end); start.setDate(start.getDate()-6);
+    var mins=0;
+    l.forEach(function(s){var d=new Date(s.date+"T12:00:00"); if(d>=start&&d<=end)mins+=s.minutes||0});
+    weeks.push({label:start.getDate()+"/"+(start.getMonth()+1),mins:Math.round(mins)});
+  }
+  var max=Math.max.apply(null,weeks.map(function(x){return x.mins}).concat([10]));
+  html+='<p style="margin-top:14px">Training minutes — last 4 weeks</p><div class="week-bars">'+weeks.map(function(x){
+    return '<div class="bar-col"><div class="bar'+(x.mins>0?"":" empty")+'" style="height:'+Math.max(5,Math.round(x.mins/max*58))+'px" title="'+x.label+': '+x.mins+' min"></div><div class="day">'+x.label+'</div></div>';
+  }).join("")+'</div><p style="font-size:12.5px;color:var(--muted);margin-top:6px">'+weeks.map(function(x){return x.label+": "+x.mins+" min"}).join(" · ")+'</p>';
+  card.innerHTML=html;
+}
+/* ================= v2 — AUDIO COACHING (speech synthesis) ================= */
+var LS_AUDIO="fitlife_coach_audio_v1";
+function audioEnabled(){try{var v=localStorage.getItem(LS_AUDIO); return v===null?true:v==="1"}catch(e){return true}}
+function setAudioEnabled(on){try{localStorage.setItem(LS_AUDIO,on?"1":"0")}catch(e){}}
+function speak(text){
+  if(!audioEnabled())return;
+  try{
+    if(!("speechSynthesis" in window))return;
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    u.rate=1.05;
+    window.speechSynthesis.speak(u);
+  }catch(e){/* voice is optional — never break the workout */}
+}
+function toggleAudio(){
+  var on=!audioEnabled(); setAudioEnabled(on);
+  var b=$("plAudioBtn"); if(b)b.textContent=on?"🔊 Voice":"🔇 Muted";
+  if(!on){try{if(window.speechSynthesis)window.speechSynthesis.cancel()}catch(e){}}
+  else speak("Coach voice on.");
+}
+function announceStep(){
+  var p=player; if(!p||p.mode!=="step")return;
+  var cur=p.steps[p.idx]; if(!cur)return;
+  if(cur.type==="time")speak(cur.ex.name+". "+cur.seconds+" seconds.");
+  else speak(cur.ex.name+". "+cur.reps+" reps. Set "+cur.set+" of "+cur.ofSets+".");
+}
+function stopSpeech(){try{if(window.speechSynthesis)window.speechSynthesis.cancel()}catch(e){}}
 /* ================= WORKOUTS TAB ================= */
 function renderBuiltIn(){
   var wrap=$("builtinList"); wrap.innerHTML="";
+  renderTrending(wrap);
+  renderCollections(wrap);
+  renderQuickWorkouts(wrap);
+  renderDumbbellWorkouts(wrap);
+  renderStretchWorkouts(wrap);
   WORKOUTS.forEach(function(w){
     var card=el("div","wk-card");
     card.innerHTML='<div class="wk-ico">'+w.icon+'</div><div class="wk-info"><h3>'+esc(w.name)+'</h3><p>'+esc(w.desc)+'</p>'+
@@ -662,16 +1232,25 @@ function renderBuiltIn(){
 function switchWkTab(which){
   $("tabBuiltIn").classList.toggle("on",which==="builtin");
   $("tabLibrary").classList.toggle("on",which==="library");
+  $("tabChallenge").classList.toggle("on",which==="challenge");
   $("builtinList").classList.toggle("hidden",which!=="builtin");
   $("libraryPane").classList.toggle("hidden",which!=="library");
+  $("challengePane").classList.toggle("hidden",which!=="challenge");
   if(which==="library")renderLibrary();
+  if(which==="challenge")renderChallengeGrid();
 }
 function renderLibrary(){
   var q=($("libSearch").value||"").toLowerCase().trim();
   var muscle=chipVal("muscleChips")||"all", eq=chipVal("libEquipChips")||"all";
   var list=$("libraryList"); list.innerHTML="";
+  var note=$("libFilterNote");
+  if(note){
+    if(libFilter){note.innerHTML='<div class="notice" style="margin-bottom:10px">Collection: <b>'+esc(libFilter.label)+'</b> — <button onclick="clearLibFilter()" style="text-decoration:underline;font-weight:700;color:var(--teal)">Show all exercises</button></div>';}
+    else note.innerHTML="";
+  }
   var found=EXERCISES.filter(function(ex){
-    if(muscle!=="all"&&ex.muscle!==muscle)return false;
+    if(libFilter){if(libFilter.muscles.indexOf(ex.muscle)<0)return false;}
+    else if(muscle!=="all"&&ex.muscle!==muscle)return false;
     if(eq!=="all"&&ex.equip!==eq)return false;
     if(q&&ex.name.toLowerCase().indexOf(q)<0&&ex.muscle.toLowerCase().indexOf(q)<0)return false;
     return true;
@@ -683,7 +1262,7 @@ function renderLibrary(){
     var sets=ex.type==="reps"?ex.sets+" × "+ex.reps+" reps":ex.sets+" × "+ex.seconds+"s";
     row.innerHTML='<div class="ex-head"><h4><span class="muscle-dot" style="background:'+(MUSCLE_COLORS[ex.muscle]||"#475569")+'"></span>'+esc(ex.name)+'</h4><span class="ex-sets">'+sets+'</span></div>'+
       '<p>'+esc(ex.inst)+'</p><p style="color:var(--teal);font-weight:600">'+esc(ex.muscle)+' · '+equipName[ex.equip]+' · Rest '+ex.rest+'s</p>'+
-      '<div class="ex-tip">💡 '+esc(ex.tip)+'</div>';
+      '<div class="ex-tip">💡 '+esc(ex.tip)+'</div>'+videoGuideHtml(ex);
     list.appendChild(row);
   });
 }
@@ -808,10 +1387,13 @@ function startPlanDay(di){
 }
 function startPlayer(title,mins,steps){
   if(!steps.length){toast("Nothing to play"); return}
-  player={title:title,mins:mins,steps:steps,idx:-1,remaining:5,total:steps.length,paused:false,started:Date.now(),mode:"ready",restLeft:0};
+  player={title:title,mins:mins,steps:steps,idx:-1,remaining:5,total:steps.length,paused:false,started:Date.now(),mode:"ready",restLeft:0,cued5:false,cuedHalf:false};
   $("player").classList.add("open");
+  var sr=$("shareRow"); if(sr){sr.classList.add("hidden"); sr.innerHTML="";}
+  var ab=$("plAudioBtn"); if(ab)ab.textContent=audioEnabled()?"🔊 Voice":"🔇 Muted";
   document.body.style.overflow="hidden";
   renderPlayerStep(); tickPlayer();
+  speak("Get ready. First up: "+steps[0].ex.name+".");
 }
 function renderPlayerStep(){
   var p=player; if(!p)return;
@@ -867,7 +1449,11 @@ function tickPlayer(){
       if(cur.type==="time"){
         p.remaining--;
         if(p.remaining<=0){afterStepDone();}
-        else renderPlayerStep();
+        else{
+          if(p.remaining===5&&!p.cued5){p.cued5=true; speak("5 seconds left.");}
+          else if(p.remaining===Math.ceil(cur.seconds/2)&&!p.cuedHalf){p.cuedHalf=true; speak("Halfway there, keep going.");}
+          renderPlayerStep();
+        }
       }
     }
   },1000);
@@ -879,7 +1465,8 @@ function advanceStep(){
   var cur=p.steps[p.idx];
   if(cur.type==="time"){p.mode="step"; p.remaining=cur.seconds;}
   else{p.mode="step"; p.remaining=0;}
-  renderPlayerStep();
+  p.cued5=false; p.cuedHalf=false;
+  renderPlayerStep(); announceStep();
 }
 function afterStepDone(){
   var p=player; if(!p)return;
@@ -887,13 +1474,14 @@ function afterStepDone(){
   var nextSame=p.steps[p.idx+1]&&p.steps[p.idx+1].ex.id===cur.ex.id;
   if(cur.type==="reps"||nextSame){
     var rest=restSecs();
-    if(p.idx+1<p.total){p.mode="rest"; p.remaining=rest; renderPlayerStep(); return}
+    if(p.idx+1<p.total){p.mode="rest"; p.remaining=rest; renderPlayerStep(); speak("Set done. Rest now. Breathe."); return}
   }
   p.idx++;
   if(p.idx>=p.total){finishWorkout(); return}
   var n=p.steps[p.idx];
   p.mode="step"; p.remaining=n.type==="time"?n.seconds:0;
-  renderPlayerStep();
+  p.cued5=false; p.cuedHalf=false;
+  renderPlayerStep(); announceStep();
 }
 function togglePause(){
   var p=player; if(!p)return;
@@ -917,9 +1505,16 @@ function endWorkout(finished){finishWorkout(finished===true)}
 function finishWorkout(completed){
   var p=player; if(!p)return;
   clearInterval(playerTimer);
+  stopSpeech();
   var mins=Math.max(1,Math.round((Date.now()-p.started)/60000));
   if(completed!==false&&p.idx>=p.total-1||completed===true){
+    var streakBefore=streak();
     logSession(p.title,mins,0);
+    bumpUsageForSteps(p.steps);
+    var streakAfter=streak();
+    if(streakAfter>streakBefore){window.__celebrate={streak:streakAfter};}
+    showShareRow(p.title,mins);
+    speak("Workout complete. Great work.");
     $("plStep").textContent="🎉 Workout complete!";
     $("plInstr").textContent="Great work. "+p.title+" logged — "+mins+" minutes. Your streak is updated.";
   } else {
@@ -936,11 +1531,13 @@ function finishWorkout(completed){
   player=null;
 }
 function closePlayer(){
-  clearInterval(playerTimer); player=null;
+  clearInterval(playerTimer); player=null; stopSpeech();
   $("player").classList.remove("open");
   document.body.style.overflow="";
   var pb=$("plPauseBtn"); pb.innerHTML="⏸ Pause"; pb.onclick=function(){togglePause()};
+  var sr=$("shareRow"); if(sr){sr.classList.add("hidden"); sr.innerHTML="";}
   renderHome();
+  if(window.__celebrate){var c=window.__celebrate; window.__celebrate=null; showCelebration(c.streak);}
 }
 /* Standalone rest timer (reuses the player overlay) */
 function openRestTimer(){
@@ -999,7 +1596,7 @@ function resetManual(){coach.manual=0; updateManualUI(); setFeedback("Counter re
 function finishManual(){
   var mins=Math.max(1,Math.round((Date.now()-coach.manualStart)/60000));
   var name=coach.exercise==="pushup"?"AI Coach — Push-Ups (manual)":"AI Coach — Squats (manual)";
-  if(coach.manual>0){logSession(name,mins,coach.manual); toast("Saved: "+coach.manual+" reps")}
+  if(coach.manual>0){logSession(name,mins,coach.manual); bumpUsage(coach.exercise==="pushup"?"pushup":"squat"); toast("Saved: "+coach.manual+" reps")}
   $("manualPane").classList.add("hidden");
   resetManual();
 }
@@ -1059,6 +1656,7 @@ function stopCoach(){
     var mins=Math.max(1,Math.round((Date.now()-coach.startTs)/60000));
     var name=coach.exercise==="pushup"?"AI Coach — Push-Ups":"AI Coach — Squats";
     logSession(name,mins,coach.count);
+    bumpUsage(coach.exercise==="pushup"?"pushup":"squat");
     toast("Saved: "+coach.count+" "+(coach.exercise==="pushup"?"push-ups":"squats"));
     coach.count=0; $("repCount").textContent="0";
   }
@@ -1125,10 +1723,13 @@ var OB_STEPS=[
    {v:"lose",label:"Lose Weight",desc:"Burn fat with circuits and cardio finishers",icon:"🔥"},
    {v:"muscle",label:"Build Muscle",desc:"Strength-focused sets with longer rests",icon:"💪"},
    {v:"fitness",label:"General Fitness",desc:"A balanced mix of strength and cardio",icon:"✦"}]},
- {key:"level",title:"How fit are you right now?",sub:"Be honest — the plan starts where you are, not where you wish you were.",type:"list",options:[
-   {v:"beginner",label:"Beginner",desc:"New to training, or coming back after a break",icon:"🌱"},
-   {v:"intermediate",label:"Intermediate",desc:"You train sometimes and know the basics",icon:"🚶"},
-   {v:"advanced",label:"Advanced",desc:"You train regularly and want a real challenge",icon:"🏋️"}]},
+ {key:"level",title:"How fit are you right now?",sub:"Slide to the line that sounds most like you — be honest, the plan starts where you are.",type:"slider",options:[
+   {v:1,label:"Just starting out",desc:"I rarely exercise and want a gentle start"},
+   {v:2,label:"Getting back into it",desc:"I have trained before, but it has been a while"},
+   {v:3,label:"Lightly active",desc:"I move a little most weeks, but not much"},
+   {v:4,label:"Regularly active",desc:"I already train a couple of times a week"},
+   {v:5,label:"Confident trainer",desc:"I train most weeks and know my way around workouts"},
+   {v:6,label:"Very fit",desc:"I train hard and want a serious challenge"}]},
  {key:"equip",title:"What equipment do you have?",sub:"No gym? No problem — most plans need nothing at all.",type:"list",options:[
    {v:"none",label:"No Equipment",desc:"Bodyweight only, anywhere",icon:"🏠"},
    {v:"dumbbells",label:"Dumbbells Only",desc:"A pair of dumbbells at home",icon:"🏋️"},
@@ -1150,7 +1751,7 @@ function applyOnboardToPlan(a){
 }
 function openOnboarding(editing){
   var saved=loadOnboard()||{};
-  obAnswers={gender:saved.gender||null,goal:saved.goal||null,level:saved.level||null,equip:saved.equip||null,days:saved.days||3};
+  obAnswers={gender:saved.gender||null,goal:saved.goal||null,level:saved.level||null,levelIdx:saved.levelIdx||1,equip:saved.equip||null,days:saved.days||3};
   obIdx=0;
   $("onboard").classList.remove("hidden");
   document.body.style.overflow="hidden";
@@ -1176,6 +1777,22 @@ function renderObStep(){
     });
     return;
   }
+  if(st.type==="slider"){
+    var opts=st.options;
+    var cur=obAnswers.levelIdx||1;
+    var wrap2=el("div","slider-lvl");
+    wrap2.innerHTML='<div class="lvl-big" id="obLvlBig">'+esc(opts[cur-1].label)+'</div><p id="obLvlDesc">'+esc(opts[cur-1].desc)+'</p>'+
+      '<input type="range" id="obLvlRange" min="1" max="6" value="'+cur+'" step="1" style="margin-top:16px">'+
+      '<div class="slider-ticks"><span>1 · New</span><span>3 · Active</span><span>6 · Very fit</span></div>';
+    body.appendChild(wrap2);
+    obAnswers.levelIdx=cur;
+    $("obLvlRange").addEventListener("input",function(){
+      var v=parseInt(this.value,10); obAnswers.levelIdx=v;
+      $("obLvlBig").textContent=opts[v-1].label;
+      $("obLvlDesc").textContent=opts[v-1].desc;
+    });
+    return;
+  }
   var list=el("div",st.type==="cards"?"ob-cards":"ob-list");
   st.options.forEach(function(o){
     var b=el("button","ob-opt"+(obAnswers[st.key]===o.v?" on":""));
@@ -1193,7 +1810,7 @@ function renderObStep(){
 }
 function obGo(dir){
   var st=OB_STEPS[obIdx];
-  if(dir===1&&st.type!=="range"&&!obAnswers[st.key]){toast("Pick one to continue"); return}
+  if(dir===1&&st.type!=="range"&&st.type!=="slider"&&!obAnswers[st.key]){toast("Pick one to continue"); return}
   obIdx+=dir;
   if(obIdx>=OB_STEPS.length){finishOnboarding(); return}
   if(obIdx<0)obIdx=0;
@@ -1205,7 +1822,8 @@ function obSkip(){
   toast("Skipped — you can set your plan up anytime in the Plan tab");
 }
 function finishOnboarding(){
-  var a={gender:obAnswers.gender,goal:obAnswers.goal,level:obAnswers.level,equip:obAnswers.equip,days:obAnswers.days,done:true};
+  var lvl=obAnswers.levelIdx?((obAnswers.levelIdx<=2)?"beginner":(obAnswers.levelIdx<=4?"intermediate":"advanced")):obAnswers.level;
+  var a={gender:obAnswers.gender,goal:obAnswers.goal,level:lvl,levelIdx:obAnswers.levelIdx||null,equip:obAnswers.equip,days:obAnswers.days,done:true};
   saveOnboard(a);
   applyOnboardToPlan(a);
   closeOnboarding();
@@ -1223,11 +1841,11 @@ function maybeShowOnboarding(){
 }
 /* ================= INIT ================= */
 chipGroup("goalChips"); chipGroup("levelChips"); chipGroup("equipChips"); chipGroup("lenChips");
-chipGroup("muscleChips",function(){renderLibrary()});
+chipGroup("muscleChips",function(){libFilter=null; renderLibrary()});
 chipGroup("libEquipChips",function(){renderLibrary()});
 chipGroup("coachExChips",function(v){coach.exercise=v});
 $("daysRange").addEventListener("input",function(){$("daysVal").textContent=$("daysRange").value+" days"});
-renderHome(); renderBuiltIn(); renderLibrary(); renderSavedPlan(); renderLog(); maybeShowOnboarding();
+renderHome(); renderBuiltIn(); renderLibrary(); renderSavedPlan(); renderLog(); renderWeight(); renderPlanCards(); renderReminderSettings(); maybeShowOnboarding();
 if("serviceWorker" in navigator){
   window.addEventListener("load",function(){
     navigator.serviceWorker.register("sw.js").catch(function(){/* offline support optional */});
