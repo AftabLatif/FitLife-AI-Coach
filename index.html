@@ -509,6 +509,23 @@ footer a{font-weight:700}
 .sum-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
 .sum-stats .stat{padding:10px 4px}
 .fb-row p{font-size:12.5px;color:var(--muted);margin-top:8px}
+/* Running Coach */
+.run-plan{cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.run-plan.on{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-light);background:var(--teal-light)}
+.run-day{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid var(--line)}
+.run-day:last-child{border-bottom:none}
+.run-day .rd-num{width:26px;height:26px;border-radius:50%;background:var(--teal-light);color:var(--teal);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.run-day.done .rd-num{background:var(--teal);color:#fff}
+.run-day.done .rd-title{color:var(--muted);text-decoration:line-through}
+.run-day .rd-title{font-weight:700;font-size:14px}
+.run-day .rd-desc{font-size:12.5px;color:var(--muted)}
+.run-day .rd-act{margin-left:auto;flex-shrink:0;display:flex;gap:6px}
+.run-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.run-stats .stat{padding:10px 2px}
+.run-stats .num{font-size:19px}
+.run-gps{font-size:12.5px;color:var(--muted);margin-top:8px}
+.run-gps.err{color:#b91c1c}
+.run-note{font-size:12.5px;color:var(--muted)}
 .hidden{display:none!important}
 </style>
 </head>
@@ -573,6 +590,10 @@ footer a{font-weight:700}
     <div class="btn-row" style="margin-top:10px">
       <button class="btn small ghost" onclick="openRestTimer()">⏱ Rest timer</button>
       <button class="btn small ghost" onclick="showView('workouts')">💪 All workouts</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn small ghost" onclick="showView('running')">🏃 Running Coach</button>
+      <button class="btn small ghost" onclick="showView('log')">📈 My progress</button>
     </div>
   </div>
   <div id="homeDiscover"></div>
@@ -715,6 +736,16 @@ footer a{font-weight:700}
 </section>
 
 <!-- ============ LOG ============ -->
+<!-- ============ RUNNING COACH ============ -->
+<section class="view" id="view-running">
+  <h2>🏃 Running Coach</h2>
+  <p class="sub">Run/walk plans, GPS tracking and audio cues — no sign-up, everything stays on this device.</p>
+  <div class="card" id="runPlanCard"></div>
+  <div class="card" id="runWeekCard"></div>
+  <div class="card" id="runTrackerCard"></div>
+  <div class="card" id="runHistoryCard"></div>
+</section>
+
 <section class="view" id="view-log">
   <h2>Your progress</h2>
   <p class="sub">Every session you finish is saved on this device.</p>
@@ -872,6 +903,7 @@ footer a{font-weight:700}
   <button class="on" data-view="home" onclick="showView('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</button>
   <button data-view="plan" onclick="showView('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z"/></svg>Plan</button>
   <button data-view="workouts" onclick="showView('workouts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"/><path d="M3 9v6M21 9v6M6.5 6.5v-2M17.5 17.5v2M6.5 17.5v2M17.5 6.5v-2"/></svg>Workouts</button>
+  <button data-view="running" onclick="showView('running')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="4.5" r="2.2"/><path d="M13.5 7.5 10 12l2.5 2.5L11 21M13.5 7.5 17 10l3.5 1M10 12l-4.5 2M12.5 14.5 17 17l1.5 4"/></svg>Running</button>
   <button data-view="coach" onclick="showView('coach')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>AI Coach</button>
   <button data-view="log" onclick="showView('log')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Log</button>
 </nav>
@@ -971,8 +1003,10 @@ function loadPlan(){try{return JSON.parse(localStorage.getItem(LS_PLAN)||"null")
 function savePlan(p){try{localStorage.setItem(LS_PLAN,JSON.stringify(p))}catch(e){}}
 function restSecs(){var v=parseInt(localStorage.getItem(LS_REST)||"60",10);return isNaN(v)?60:v}
 function setRestSecs(v){try{localStorage.setItem(LS_REST,String(v))}catch(e){}}
-function logSession(name,minutes,reps){
-  var l=loadLog(); l.push({date:new Date().toISOString().slice(0,10),name:name,minutes:minutes,reps:reps||0,ts:Date.now()});
+function logSession(name,minutes,reps,extra){
+  var l=loadLog(); var e={date:new Date().toISOString().slice(0,10),name:name,minutes:minutes,reps:reps||0,ts:Date.now()};
+  if(extra)for(var k in extra)e[k]=extra[k];
+  l.push(e);
   saveLog(l); markChallengeDone(new Date().toISOString().slice(0,10)); renderHome(); renderLog();
 }
 function dayKey(d){return d.toISOString().slice(0,10)}
@@ -1018,6 +1052,7 @@ function showView(name){
   if(name==="workouts"){renderBuiltIn(); renderLibrary(); renderChallengeGrid(); renderStreakChal(); renderFavorites(); renderDiscover($("discoverList")); renderBuilder();}
   if(name==="log"){renderLog(); renderWeight(); renderWater(); renderReminderSettings(); renderSettingsCard();}
   if(name==="plan"){renderProfile(); if(!$("planOut").innerHTML)renderSavedPlan();}
+  if(name==="running")renderRunAll();
   if(name==="coach")stopCoach();
 }
 /* ================= HOME ================= */
@@ -1089,9 +1124,10 @@ function renderLog(){
     list.appendChild(head);
     items.forEach(function(s){
       var d=new Date(s.date+"T12:00:00");
+      var runExtra=s.run?((s.distKm!=null?' · '+s.distKm.toFixed(2)+' km':'')+(s.pace?' · '+fmtPace(s.pace)+' /km':'')+(s.kcal?' · ~'+s.kcal+' kcal est.':'')):'';
       var row=el("div","log-row");
       row.innerHTML='<div class="log-date"><b>'+d.getDate()+'</b><span>'+MONTHS[d.getMonth()]+'</span></div>'+
-        '<div class="log-info"><b>'+esc(s.name)+'</b><p>'+s.minutes+' min'+(s.reps?' · '+s.reps+' reps':'')+'</p></div>'+
+        '<div class="log-info"><b>'+esc(s.name)+'</b><p>'+s.minutes+' min'+(s.reps?' · '+s.reps+' reps':'')+runExtra+'</p></div>'+
         '<span style="font-size:20px">✓</span>';
       list.appendChild(row);
     });
@@ -2683,13 +2719,313 @@ function saveProfileTarget(){
   var w=loadWeight(); w.target=v; saveWeight(w); renderWeight(); renderProfile(); toast("Weight target saved: "+v+" kg");
 }
 
+/* ================= RUNNING COACH ================= */
+var LS_RUN="fitlife_coach_run_v1";
+var RUN_WARM=300, RUN_COOL=300; /* 5-min walk warm-up / cool-down on every plan session */
+function runSeg(kind,secs){return {kind:kind,secs:secs}}
+function runIv(reps,runSec,walkSec){var s=[];for(var i=0;i<reps;i++){s.push(runSeg("run",runSec));s.push(runSeg("walk",walkSec));}return s}
+function runCore(){var s=[];for(var i=0;i<arguments.length;i++)s=s.concat(arguments[i]);return s}
+function runSteady(mins){return [runSeg("run",mins*60)]}
+function runWrap(core){return [runSeg("walk",RUN_WARM)].concat(core).concat([runSeg("walk",RUN_COOL)])}
+function runW(title,core,note){return {title:title,steps:runWrap(core),note:note||""}}
+var RUN_PLANS=[
+ {id:"c25k",name:"Couch to 5K",weeks:8,perWeek:3,level:"Beginner",desc:"From the couch to 5 km in 8 weeks. Three run/walk sessions a week — no running experience needed.",
+  days:[
+   [runW("Run 1 min · Walk 90 sec × 8",runIv(8,60,90),"Easy pace — you should be able to talk while you run."),
+    runW("Run 1 min · Walk 90 sec × 8",runIv(8,60,90),""),
+    runW("Run 1 min · Walk 90 sec × 8",runIv(8,60,90),"")],
+   [runW("Run 90 sec · Walk 2 min × 6",runIv(6,90,120),""),
+    runW("Run 90 sec · Walk 2 min × 6",runIv(6,90,120),""),
+    runW("Run 90 sec · Walk 2 min × 6",runIv(6,90,120),"")],
+   [runW("90 sec run · 3 min run, repeated",runCore(runIv(1,90,90),runIv(1,180,180),runIv(1,90,90),runIv(1,180,180)),""),
+    runW("90 sec run · 3 min run, repeated",runCore(runIv(1,90,90),runIv(1,180,180),runIv(1,90,90),runIv(1,180,180)),""),
+    runW("90 sec run · 3 min run, repeated",runCore(runIv(1,90,90),runIv(1,180,180),runIv(1,90,90),runIv(1,180,180)),"")],
+   [runW("3 min · 5 min · 3 min · 5 min runs",runCore(runSeg("run",180),runSeg("walk",90),runSeg("run",300),runSeg("walk",150),runSeg("run",180),runSeg("walk",90),runSeg("run",300)),"Walk 90 sec between runs, 2½ min after the 5-minute run."),
+    runW("3 min · 5 min · 3 min · 5 min runs",runCore(runSeg("run",180),runSeg("walk",90),runSeg("run",300),runSeg("walk",150),runSeg("run",180),runSeg("walk",90),runSeg("run",300)),""),
+    runW("3 min · 5 min · 3 min · 5 min runs",runCore(runSeg("run",180),runSeg("walk",90),runSeg("run",300),runSeg("walk",150),runSeg("run",180),runSeg("walk",90),runSeg("run",300)),"")],
+   [runW("5 min · 5 min · 5 min runs",runCore(runSeg("run",300),runSeg("walk",180),runSeg("run",300),runSeg("walk",180),runSeg("run",300)),""),
+    runW("8 min · 8 min runs",runCore(runSeg("run",480),runSeg("walk",300),runSeg("run",480)),""),
+    runW("Steady run — 20 min",runSteady(20),"No walking breaks — slow and steady.")],
+   [runW("5 min · 8 min · 5 min runs",runCore(runSeg("run",300),runSeg("walk",180),runSeg("run",480),runSeg("walk",180),runSeg("run",300)),""),
+    runW("10 min · 10 min runs",runCore(runSeg("run",600),runSeg("walk",180),runSeg("run",600)),""),
+    runW("Steady run — 25 min",runSteady(25),"")],
+   [runW("Steady run — 25 min",runSteady(25),""),
+    runW("Steady run — 25 min",runSteady(25),""),
+    runW("Steady run — 25 min",runSteady(25),"")],
+   [runW("Steady run — 28 min",runSteady(28),""),
+    runW("Steady run — 28 min",runSteady(28),""),
+    runW("Steady run — 30 min",runSteady(30),"Race day — run 5K!")]]},
+ {id:"improver",name:"5K Improver",weeks:6,perWeek:3,level:"Intermediate",desc:"You can already run 5K — now run it faster. One interval day, one steady day and one long run each week.",
+  days:[
+   [runW("Run 2 min · Walk 1 min × 6",runIv(6,120,60),"Intervals — run brisk, walk to recover."),
+    runW("Steady run — 20 min",runSteady(20),"Easy pace."),
+    runW("Long run — 25 min",runSteady(25),"Long run — slow and steady.")],
+   [runW("Run 2 min · Walk 1 min × 8",runIv(8,120,60),""),
+    runW("Steady run — 22 min",runSteady(22),""),
+    runW("Long run — 28 min",runSteady(28),"")],
+   [runW("Run 3 min · Walk 1 min × 5",runIv(5,180,60),""),
+    runW("Steady run — 25 min",runSteady(25),""),
+    runW("Long run — 30 min",runSteady(30),"")],
+   [runW("Run 4 min · Walk 1 min × 4",runIv(4,240,60),""),
+    runW("Tempo run — 25 min",runSteady(25),"Tempo — comfortably hard pace."),
+    runW("Long run — 32 min",runSteady(32),"")],
+   [runW("Run 5 min · Walk 90 sec × 3",runIv(3,300,90),""),
+    runW("Steady run — 28 min",runSteady(28),""),
+    runW("Long run — 35 min",runSteady(35),"")],
+   [runW("Run 3 min · Walk 1 min × 4",runIv(4,180,60),""),
+    runW("Easy run — 20 min",runSteady(20),"Easy shake-out run."),
+    runW("Steady run — 30 min",runSteady(30),"Race day — run 5K!")]]},
+ {id:"tenk",name:"10K",weeks:8,perWeek:4,level:"Intermediate",desc:"Build from 5K to 10K in 8 weeks. Intervals, a steady run, a tempo run and a long run every week.",
+  days:[
+   [runW("Run 3 min · Walk 90 sec × 6",runIv(6,180,90),"Intervals — run brisk, walk to recover."),
+    runW("Steady run — 25 min",runSteady(25),"Easy pace."),
+    runW("Tempo run — 20 min",runSteady(20),"Tempo — comfortably hard pace."),
+    runW("Long run — 35 min",runSteady(35),"Long run — slow and steady.")],
+   [runW("Run 4 min · Walk 90 sec × 5",runIv(5,240,90),""),
+    runW("Steady run — 28 min",runSteady(28),""),
+    runW("Tempo run — 22 min",runSteady(22),"Tempo — comfortably hard pace."),
+    runW("Long run — 40 min",runSteady(40),"")],
+   [runW("Run 5 min · Walk 90 sec × 4",runIv(4,300,90),""),
+    runW("Steady run — 30 min",runSteady(30),""),
+    runW("Tempo run — 25 min",runSteady(25),"Tempo — comfortably hard pace."),
+    runW("Long run — 45 min",runSteady(45),"")],
+   [runW("Run 3 min · Walk 1 min × 6",runIv(6,180,60),"Recovery week — a little easier."),
+    runW("Steady run — 30 min",runSteady(30),""),
+    runW("Tempo run — 25 min",runSteady(25),"Tempo — comfortably hard pace."),
+    runW("Long run — 40 min",runSteady(40),"")],
+   [runW("Run 6 min · Walk 90 sec × 4",runIv(4,360,90),""),
+    runW("Steady run — 32 min",runSteady(32),""),
+    runW("Tempo run — 28 min",runSteady(28),"Tempo — comfortably hard pace."),
+    runW("Long run — 50 min",runSteady(50),"")],
+   [runW("Run 8 min · Walk 2 min × 3",runIv(3,480,120),""),
+    runW("Steady run — 35 min",runSteady(35),""),
+    runW("Tempo run — 30 min",runSteady(30),"Tempo — comfortably hard pace."),
+    runW("Long run — 55 min",runSteady(55),"")],
+   [runW("Run 5 min · Walk 90 sec × 4",runIv(4,300,90),""),
+    runW("Steady run — 35 min",runSteady(35),""),
+    runW("Tempo run — 30 min",runSteady(30),"Tempo — comfortably hard pace."),
+    runW("Long run — 60 min",runSteady(60),"")],
+   [runW("Run 4 min · Walk 1 min × 3",runIv(3,240,60),"Taper week — race day is coming."),
+    runW("Steady run — 25 min",runSteady(25),""),
+    runW("Easy run — 20 min",runSteady(20),"Easy shake-out run."),
+    runW("Steady run — 60 min",runSteady(60),"Race day — run 10K!")]]}
+];
+function runPlanById(id){for(var i=0;i<RUN_PLANS.length;i++)if(RUN_PLANS[i].id===id)return RUN_PLANS[i]; return RUN_PLANS[0]}
+function runDayKey(w,d){return "w"+w+"d"+d}
+function runWorkoutMins(w){var s=0; w.steps.forEach(function(x){s+=x.secs}); return Math.max(1,Math.round(s/60))}
+function runTotalWorkouts(p){var n=0; p.days.forEach(function(w){n+=w.length}); return n}
+function loadRun(){try{var r=JSON.parse(localStorage.getItem(LS_RUN)||"null"); if(r&&r.planId&&r.doneByPlan)return {planId:r.planId,doneByPlan:r.doneByPlan}; return {planId:"c25k",doneByPlan:{}}}catch(e){return {planId:"c25k",doneByPlan:{}}}}
+function saveRun(r){try{localStorage.setItem(LS_RUN,JSON.stringify(r))}catch(e){}}
+function runDoneList(){var r=loadRun(); var d=r.doneByPlan[r.planId]; return Array.isArray(d)?d:[]}
+function runIsDone(w,d){return runDoneList().indexOf(runDayKey(w,d))>=0}
+function runSetDone(w,d,on){var r=loadRun(); var list=runDoneList().slice(); var k=runDayKey(w,d); var i=list.indexOf(k); if(on&&i<0)list.push(k); if(!on&&i>=0)list.splice(i,1); r.doneByPlan[r.planId]=list; saveRun(r);}
+function runCurrentWeek(){var p=runPlanById(loadRun().planId); for(var wi=0;wi<p.days.length;wi++)for(var di=0;di<p.days[wi].length;di++){if(!runIsDone(wi+1,di+1))return wi+1;} return p.days.length}
+var runViewWeek=0;
+function runSelectPlan(id){var r=loadRun(); r.planId=id; saveRun(r); runViewWeek=0; renderRunAll();}
+function runGoWeek(w){runViewWeek=w; renderRunWeek();}
+function runToggleDone(w,d){runSetDone(w,d,!runIsDone(w,d)); renderRunWeek();}
+function fmtPace(p){if(!p||!isFinite(p))return "—"; var m=Math.floor(p), s=Math.round((p-m)*60); if(s===60){m++;s=0} return m+":"+(s<10?"0":"")+s}
+function fmtPaceSpoken(p){if(!p||!isFinite(p))return ""; var m=Math.floor(p), s=Math.round((p-m)*60); if(s===60){m++;s=0} return m+" minutes "+s+" seconds"}
+function runHav(lat1,lon1,lat2,lon2){var R=6371000, dLa=(lat2-lat1)*Math.PI/180, dLo=(lon2-lon1)*Math.PI/180; var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(a))}
+function renderRunPlan(){
+  var box=$("runPlanCard"); if(!box)return;
+  var r=loadRun();
+  var h='<h3>🏃 Choose your running plan</h3><p>Every session starts with a 5-minute warm-up walk and ends with a 5-minute cool-down walk.</p>';
+  RUN_PLANS.forEach(function(p){
+    var done=(r.doneByPlan[p.id]||[]).length, total=runTotalWorkouts(p);
+    h+='<div class="run-plan'+(r.planId===p.id?' on':'')+'" onclick="runSelectPlan(\''+p.id+'\')"><b>'+esc(p.name)+'</b> · '+p.weeks+' weeks · '+p.perWeek+' days/week · '+esc(p.level)+
+      '<p style="margin:4px 0 6px">'+esc(p.desc)+'</p>'+
+      '<p style="margin:0"><b>'+done+' / '+total+' sessions done</b>'+(r.planId===p.id?' · <b style="color:var(--teal)">Selected ✓</b>':'')+'</p></div>';
+  });
+  box.innerHTML=h;
+}
+function renderRunWeek(){
+  var box=$("runWeekCard"); if(!box)return;
+  var r=loadRun(), p=runPlanById(r.planId);
+  var wk=runViewWeek||runCurrentWeek();
+  var done=(r.doneByPlan[p.id]||[]).length, total=runTotalWorkouts(p);
+  var h='<h3>'+esc(p.name)+' — Week '+wk+' of '+p.days.length+'</h3>';
+  h+='<p>'+done+' of '+total+' sessions done · '+p.level+' · '+p.perWeek+' sessions this week</p>';
+  h+='<div class="chips" style="margin-bottom:8px">'+p.days.map(function(_,i){return '<button class="chip'+(wk===i+1?' on':'')+'" onclick="runGoWeek('+(i+1)+')">Week '+(i+1)+'</button>'}).join('')+'</div>';
+  p.days[wk-1].forEach(function(w,di){
+    var d=di+1, isDone=runIsDone(wk,d);
+    h+='<div class="run-day'+(isDone?' done':'')+'"><div class="rd-num">'+(isDone?'✓':d)+'</div><div><div class="rd-title">Day '+d+' — '+esc(w.title)+'</div><div class="rd-desc">~'+runWorkoutMins(w)+' min'+(w.note?' · '+esc(w.note):'')+'</div></div>'+
+    '<div class="rd-act"><button class="btn small" onclick="runStartPlan('+wk+','+d+')">▶ Start</button>'+
+    '<button class="btn small ghost" onclick="runToggleDone('+wk+','+d+')">'+(isDone?'Undo':'✓ Done')+'</button></div></div>';
+  });
+  box.innerHTML=h;
+}
+function renderRunTracker(){
+  var box=$("runTrackerCard"); if(!box)return;
+  var voice=audioEnabled();
+  var h='<h3>📍 GPS run tracker</h3>';
+  if(!runT){
+    h+='<p>Track a run with live distance, pace and time. Voice cues announce every kilometre and every run/walk change.</p>'+
+    '<div class="run-stats"><div class="stat"><div class="num">0.00</div><div class="lbl">km</div></div><div class="stat"><div class="num">0:00</div><div class="lbl">time</div></div><div class="stat"><div class="num">—</div><div class="lbl">pace /km</div></div><div class="stat"><div class="num">0</div><div class="lbl">kcal est.</div></div></div>'+
+    '<div class="btn-row"><button class="btn" onclick="runStartFree()">▶ Start free run</button><button class="btn ghost" onclick="toggleVoicePref();renderRunTracker()">'+(voice?'🔊 Voice on':'🔇 Voice off')+'</button></div>'+
+    '<p class="run-note">Keep this screen open while you run — tracking stops if the app is closed. GPS works outdoors; indoors the signal may be weak. If location is off, the timer still works and distance stays at zero.</p>';
+  }else{
+    var s=runStats();
+    h+='<p><b>'+esc(runT.label)+'</b>'+(runT.mode==="plan"?' · <span id="runSegLbl">'+esc(runSegLabel(runT.segKind||"walk"))+'</span>':'')+'</p>'+
+    '<div class="run-stats"><div class="stat"><div class="num" id="runDist">'+s.distKm.toFixed(2)+'</div><div class="lbl">km</div></div><div class="stat"><div class="num" id="runTime">'+fmtClock(s.elapsedSec)+'</div><div class="lbl">time</div></div><div class="stat"><div class="num" id="runPace">'+fmtPace(s.pace)+'</div><div class="lbl">pace /km</div></div><div class="stat"><div class="num" id="runKcal">'+s.kcal+'</div><div class="lbl">kcal est.</div></div></div>';
+    if(runT.mode==="plan"){
+      h+='<div class="chal-bar"><i id="runSegBar" style="width:0%"></i></div><p class="run-note" id="runSegRem"></p>';
+    }
+    h+='<div class="btn-row">';
+    if(runT.status==="running")h+='<button class="btn ghost" onclick="runPause()">⏸ Pause</button>';
+    else h+='<button class="btn" onclick="runResume()">▶ Resume</button>';
+    h+='<button class="btn" onclick="runStop(true)">■ Stop &amp; save</button>';
+    h+='<button class="btn ghost" onclick="runDiscard()">Discard</button></div>';
+    h+='<p class="run-gps" id="runGps">'+esc(runT.gpsMsg)+'</p>';
+  }
+  box.innerHTML=h;
+}
+function renderRunHistory(){
+  var box=$("runHistoryCard"); if(!box)return;
+  var runs=loadLog().filter(function(s){return s.run}).slice().sort(function(a,b){return b.ts-a.ts}).slice(0,5);
+  var h='<h3>🏃 Recent runs</h3>';
+  if(!runs.length){h+='<p class="run-note">No runs yet. Start a free run or a plan session above.</p>';}
+  else{
+    var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    runs.forEach(function(s){
+      var d=new Date(s.date+"T12:00:00");
+      h+='<div class="run-day"><div class="rd-num">🏃</div><div><div class="rd-title">'+esc(s.name)+'</div><div class="rd-desc">'+d.getDate()+' '+MONTHS[d.getMonth()]+' · '+s.minutes+' min'+(s.pace?' · '+fmtPace(s.pace)+' /km':'')+(s.kcal?' · ~'+s.kcal+' kcal est.':'')+'</div></div></div>';
+    });
+    h+='<p class="run-note" style="margin-top:8px">All runs also appear in <a href="#" onclick="showView(\'log\');return false">Log → Workout history</a>.</p>';
+  }
+  box.innerHTML=h;
+}
+function renderRunAll(){renderRunPlan(); renderRunWeek(); renderRunTracker(); renderRunHistory();}
+/* ---- tracker engine ---- */
+var runT=null;
+function runElapsedMs(){if(!runT)return 0; return runT.elapsedBase+(runT.status==="running"?Date.now()-runT.segStart:0)}
+function runStats(){
+  if(!runT)return {distKm:0,elapsedSec:0,pace:null,curPace:null,kcal:0};
+  var el=runElapsedMs(), distKm=runT.distM/1000;
+  var pace=distKm>0.02?(el/60000)/distKm:null;
+  var cur=null, now=Date.now(), pts=runT.points;
+  if(pts.length>1){
+    var cut=now-30000, base=null;
+    for(var i=pts.length-1;i>=0;i--){if(pts[i].t<=cut){base=pts[i];break}}
+    if(!base)base=pts[0];
+    var dd=runT.distM-base.d, dt=(now-base.t)/1000;
+    if(dd>=20&&dt>=10)cur=(dt/60)/(dd/1000);
+  }
+  var w=currentWeight()||70;
+  return {distKm:distKm,elapsedSec:Math.floor(el/1000),pace:pace,curPace:cur,kcal:Math.round(distKm*w*1.036)};
+}
+function runSegLabel(kind){return {walk:"Walk",run:"Run"}[kind]||"Walk"}
+function runCurrentSeg(){
+  var w=runT.workout; if(!w)return null;
+  var el=runStats().elapsedSec, acc=0;
+  for(var i=0;i<w.steps.length;i++){var st=w.steps[i]; if(el<acc+st.secs)return {idx:i,seg:st,remaining:acc+st.secs-el,total:w.steps.length}; acc+=st.secs;}
+  return {idx:w.steps.length-1,seg:w.steps[w.steps.length-1],remaining:0,total:w.steps.length};
+}
+function runSegCue(seg){
+  var w=runT.workout; if(!w)return "";
+  var first=seg.idx===0, last=seg.idx===w.steps.length-1;
+  if(seg.seg.kind==="run")return "Run now.";
+  if(first)return "Warm-up walk. 5 minutes, easy pace.";
+  if(last)return "Cool-down walk. Well done.";
+  return "Walk now.";
+}
+function runWakeLock(on){
+  try{
+    if(on&&navigator.wakeLock&&navigator.wakeLock.request){navigator.wakeLock.request("screen").then(function(l){if(runT)runT.wl=l}).catch(function(){});}
+    else if(runT&&runT.wl){try{runT.wl.release()}catch(e){} runT.wl=null;}
+  }catch(e){}
+}
+function runStartCommon(mode,week,day,workout,label){
+  if(runT){if(runT.timerId)clearInterval(runT.timerId); runStopWatch(); runWakeLock(false); stopSpeech();}
+  runT={mode:mode,week:week||0,day:day||0,workout:workout||null,label:label,status:"running",startTs:Date.now(),elapsedBase:0,segStart:Date.now(),distM:0,points:[],lastPos:null,kmAnnounced:0,segIdx:0,segKind:"walk",watchId:null,wl:null,timerId:null,finished:false,gpsState:"waiting",gpsMsg:"Waiting for GPS signal…"};
+  runStartWatch();
+  runWakeLock(true);
+  runT.timerId=setInterval(runTick,1000);
+  if(mode==="plan")speak("Starting "+label+". Warm-up walk, 5 minutes.");
+  else speak("Run started. Have a good run.");
+  renderRunTracker(); showView("running");
+}
+function runStartFree(){runStartCommon("free",0,0,null,"Free run");}
+function runStartPlan(w,d){var p=runPlanById(loadRun().planId); var wk=p.days[w-1]&&p.days[w-1][d-1]; if(!wk)return; runStartCommon("plan",w,d,wk,p.name+" · Week "+w+" Day "+d);}
+function runStartWatch(){
+  if(!("geolocation" in navigator)){runT.gpsState="none"; runT.gpsMsg="No GPS on this device — timer only."; return;}
+  try{
+    runT.watchId=navigator.geolocation.watchPosition(runOnPos,runOnPosErr,{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+  }catch(e){runT.gpsState="none"; runT.gpsMsg="Location is not available on this device — timer only.";}
+}
+function runStopWatch(){if(runT&&runT.watchId!=null){try{navigator.geolocation.clearWatch(runT.watchId)}catch(e){}} if(runT)runT.watchId=null;}
+function runOnPos(pos){
+  if(!runT)return;
+  var c=pos.coords;
+  if(c.accuracy!=null&&c.accuracy>60)return;
+  if(runT.gpsState!=="ok"){runT.gpsState="ok"; runT.gpsMsg="GPS ready — tracking your route.";}
+  if(runT.status!=="running"){runT.lastPos={lat:c.latitude,lon:c.longitude,t:pos.timestamp}; return;}
+  if(runT.lastPos){
+    var d=runHav(runT.lastPos.lat,runT.lastPos.lon,c.latitude,c.longitude);
+    var dt=(pos.timestamp-runT.lastPos.t)/1000;
+    if(d>=3){
+      var kmh=dt>0?(d/dt)*3.6:0;
+      if(kmh<=30){runT.distM+=d; runT.points.push({t:pos.timestamp,d:runT.distM});}
+    }
+  }
+  runT.lastPos={lat:c.latitude,lon:c.longitude,t:pos.timestamp};
+}
+function runOnPosErr(err){
+  if(!runT)return;
+  if(err&&err.code===1){runT.gpsState="denied"; runT.gpsMsg="Location permission denied — distance will not be tracked. You can still run with the timer.";}
+  else if(runT.gpsState!=="ok"){runT.gpsState="waiting"; runT.gpsMsg="Waiting for GPS signal… Go outdoors for a faster fix.";}
+}
+function runTick(){
+  if(!runT)return;
+  var s=runStats();
+  var d=$("runDist"); if(d)d.textContent=s.distKm.toFixed(2);
+  var t=$("runTime"); if(t)t.textContent=fmtClock(s.elapsedSec);
+  var pc=$("runPace"); if(pc)pc.textContent=fmtPace(s.curPace||s.pace);
+  var kc=$("runKcal"); if(kc)kc.textContent=String(s.kcal);
+  var g=$("runGps"); if(g){g.textContent=runT.gpsMsg; g.classList.toggle("err",runT.gpsState==="denied");}
+  var km=Math.floor(s.distKm);
+  if(km>runT.kmAnnounced){runT.kmAnnounced=km; speak(km+(km>1?" kilometres":" kilometre")+(s.pace?", pace "+fmtPaceSpoken(s.pace)+" per kilometre":"")+".");}
+  if(runT.mode==="plan"&&runT.workout){
+    var seg=runCurrentSeg();
+    if(seg){
+      if(seg.idx!==runT.segIdx){runT.segIdx=seg.idx; runT.segKind=seg.seg.kind; var cue=runSegCue(seg); if(cue){beep(); speak(cue);}}
+      var bar=$("runSegBar"); if(bar){var tot=0; runT.workout.steps.forEach(function(x){tot+=x.secs}); bar.style.width=Math.min(100,Math.round(s.elapsedSec/tot*100))+"%";}
+      var rem=$("runSegRem"); if(rem)rem.textContent="Segment "+(seg.idx+1)+" of "+seg.total+" · "+runSegLabel(seg.seg.kind)+" — "+fmtClock(seg.remaining)+" left in this part.";
+      var lb=$("runSegLbl"); if(lb)lb.textContent=runSegLabel(seg.seg.kind);
+    }
+    if(!runT.finished){
+      var total=0; runT.workout.steps.forEach(function(x){total+=x.secs});
+      if(s.elapsedSec>=total){runT.finished=true; speak("Workout complete. Great work."); setTimeout(function(){if(runT)runStop(true)},1200);}
+    }
+  }
+}
+function runPause(){if(!runT||runT.status!=="running")return; runT.elapsedBase+=Date.now()-runT.segStart; runT.status="paused"; speak("Paused."); renderRunTracker();}
+function runResume(){if(!runT||runT.status!=="paused")return; runT.segStart=Date.now(); runT.status="running"; runT.lastPos=null; speak("Resuming."); renderRunTracker();}
+function runStop(save){
+  if(!runT)return;
+  var s=runStats();
+  runStopWatch(); if(runT.timerId)clearInterval(runT.timerId); runWakeLock(false); stopSpeech();
+  var t=runT; runT=null;
+  if(save){
+    if(s.elapsedSec<30&&s.distKm<0.05){toast("Run too short to save"); renderRunTracker(); return;}
+    var mins=Math.max(1,Math.round(s.elapsedSec/60));
+    var name=t.mode==="plan"?(t.label+" · "+s.distKm.toFixed(2)+" km"):"Free run · "+s.distKm.toFixed(2)+" km";
+    logSession(name,mins,0,{run:true,distKm:Math.round(s.distKm*100)/100,pace:s.pace||null,kcal:s.kcal});
+    if(t.mode==="plan")runSetDone(t.week,t.day,true);
+    toast("Run saved: "+s.distKm.toFixed(2)+" km in "+fmtClock(s.elapsedSec));
+    speak("Run saved. Well done.");
+  }else{toast("Run discarded");}
+  renderRunAll();
+}
+function runDiscard(){if(!runT)return; if(confirm("Discard this run without saving?"))runStop(false);}
+
 /* ================= INIT ================= */
 chipGroup("goalChips"); chipGroup("levelChips"); chipGroup("equipChips"); chipGroup("lenChips");
 chipGroup("muscleChips",function(){libFilter=null; renderLibrary()});
 chipGroup("libEquipChips",function(){renderLibrary()});
 chipGroup("coachExChips",function(v){coach.exercise=v});
 $("daysRange").addEventListener("input",function(){$("daysVal").textContent=$("daysRange").value+" days"});
-renderHome(); renderBuiltIn(); renderLibrary(); renderSavedPlan(); renderLog(); renderWeight(); renderWater(); renderPlanCards(); renderProfile(); renderReminderSettings(); renderSettingsCard(); renderStreakChal(); renderFavorites(); renderDiscover($("discoverList")); renderBuilder(); maybeShowOnboarding();
+renderHome(); renderBuiltIn(); renderLibrary(); renderSavedPlan(); renderLog(); renderWeight(); renderWater(); renderPlanCards(); renderProfile(); renderReminderSettings(); renderSettingsCard(); renderRunAll(); renderStreakChal(); renderFavorites(); renderDiscover($("discoverList")); renderBuilder(); maybeShowOnboarding();
 if("serviceWorker" in navigator){
   window.addEventListener("load",function(){
     navigator.serviceWorker.register("sw.js").catch(function(){/* offline support optional */});
