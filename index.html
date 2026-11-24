@@ -698,6 +698,7 @@ footer a{font-weight:700}
 
 <!-- ============ AI COACH (CAMERA) ============ -->
 <section class="view" id="view-coach">
+  <button class="btn ghost" style="margin-bottom:10px" onclick="goBack()">← Back</button>
   <h2>AI Rep Counter</h2>
   <p class="sub">Your camera watches your form and counts every rep. Video never leaves your device.</p>
   <div class="notice">For best results: place your phone sideways, step back so your whole body is visible, and train in good light. Push-ups: side view. Squats: side view.</div>
@@ -1043,7 +1044,13 @@ function chipGroup(id, cb){
 }
 function chipVal(id){var b=$(id).querySelector(".chip.on"); return b?b.dataset.v:null}
 /* ================= NAVIGATION ================= */
-function showView(name){
+var currentView="home", pushedStates=0;
+function showView(name, fromPop){
+  if(currentView==="coach"&&name!=="coach")stopCoach();
+  if(!fromPop&&name!==currentView){
+    try{history.pushState({view:name},"","#"+name); pushedStates++;}catch(e){}
+  }
+  currentView=name;
   document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active")});
   var v=$("view-"+name); if(v)v.classList.add("active");
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.view===name)});
@@ -1055,6 +1062,15 @@ function showView(name){
   if(name==="running")renderRunAll();
   if(name==="coach")stopCoach();
 }
+function goBack(){
+  if(pushedStates>0){try{history.back();}catch(e){showView("home",true);}}
+  else showView("home",true);
+}
+window.addEventListener("popstate",function(e){
+  if(pushedStates>0)pushedStates--;
+  var v=(e.state&&e.state.view)||"home";
+  showView(v,true);
+});
 /* ================= HOME ================= */
 var TODAY_ROTATION=["apt-cardio","ab10","fullbody","pushup-prog"];
 function renderHome(){
@@ -2126,19 +2142,40 @@ function startCoach(){
   $("manualPane").classList.add("hidden");
   setFeedback("Starting camera…","good");
   $("camStartBtn").disabled=true;
-  loadLandmarker().then(function(){
-    return navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false});
-  }).then(function(stream){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    $("camStartBtn").disabled=false;
+    setFeedback("This device or browser cannot open a camera — use manual counting below.","warn");
+    showManual(); return;
+  }
+  // Ask for the camera FIRST so the preview appears immediately,
+  // while the AI model loads in parallel in the background.
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false}).then(function(stream){
     coach.stream=stream; coach.active=true; coach.videoReady=false;
     var v=$("camVideo"); v.srcObject=stream;
     $("camOff").classList.add("hidden"); v.classList.remove("hidden"); $("camCanvas").classList.remove("hidden");
     $("camStartBtn").classList.add("hidden"); $("camStopBtn").classList.remove("hidden");
     $("camStartBtn").disabled=false;
-    setFeedback("Show your full body to the camera — side view works best.","good");
-    v.onloadeddata=function(){coach.videoReady=true; coachLoop();};
+    setFeedback("Camera on — loading AI rep counter…","good");
+    v.onloadeddata=function(){coach.videoReady=true; if(coach.landmarker)coachLoop();};
+    loadLandmarker().then(function(){
+      if(!coach.active)return;
+      setFeedback("Show your full body to the camera — side view works best.","good");
+      if(coach.videoReady)coachLoop();
+    }).catch(function(){
+      if(!coach.active)return;
+      setFeedback("Camera is on but the AI counter could not load (slow connection) — count manually below, or tap Stop and try again.","warn");
+      showManual();
+    });
   }).catch(function(err){
     $("camStartBtn").disabled=false;
-    var msg=(err&&err.name==="NotAllowedError")?"Camera access denied — use manual counting below.":"Camera or AI could not start — use manual counting below.";
+    var msg;
+    if(err&&err.name==="NotAllowedError"){
+      msg="Camera blocked — allow it in Settings → Apps → FitLife Coach → Permissions → Camera → Allow, then tap Start camera again.";
+    } else if(err&&err.name==="NotFoundError"){
+      msg="No camera found on this device — use manual counting below.";
+    } else {
+      msg="Camera could not start — use manual counting below.";
+    }
     setFeedback(msg,"warn");
     showManual();
   });
