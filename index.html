@@ -505,7 +505,6 @@ footer a{font-weight:700}
 .pp-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
 .pp-table th,.pp-table td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
 .pp-table th{color:var(--muted);font-size:12px}
-.day-head .lock-note{font-size:12px;color:var(--muted)}
 .sum-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
 .sum-stats .stat{padding:10px 4px}
 .fb-row p{font-size:12.5px;color:var(--muted);margin-top:8px}
@@ -717,6 +716,23 @@ footer a{font-weight:700}
       <video id="camVideo" playsinline muted class="hidden"></video>
       <canvas id="camCanvas" class="hidden"></canvas>
     </div>
+    <div id="camPrimer" class="hidden" style="border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;text-align:left">
+      <b>📷 Before the camera starts</b>
+      <p style="font-size:14px;margin:8px 0">Your camera watches your form and counts your reps automatically. The video is processed on your phone only — it is never uploaded, recorded or shared.</p>
+      <p style="font-size:14px;margin:8px 0">When your browser asks, tap <b>Allow</b> to turn the camera on. (Permissions are granted by you at first use — no app can turn the camera on by itself at install.)</p>
+      <div class="btn-row">
+        <button class="btn" id="camPrimerAllowBtn">Allow camera</button>
+        <button class="btn ghost" id="camPrimerManualBtn">Count manually instead</button>
+      </div>
+    </div>
+    <div id="camDenied" class="hidden" style="border:1px solid #fbbf24;border-radius:12px;padding:14px;margin-bottom:12px;text-align:left;background:var(--amber-light)">
+      <b>Camera is blocked</b>
+      <p style="font-size:14px;margin:8px 0">Your browser will not ask again until the permission is turned on:</p>
+      <p style="font-size:14px;margin:8px 0">Android: Settings → Apps → FitLife Coach → Permissions → Camera → Allow.<br>iPhone / iPad: Settings → Safari → Camera → Allow.</p>
+      <div class="btn-row">
+        <button class="btn" id="camDeniedRetryBtn">Enable camera — try again</button>
+      </div>
+    </div>
     <div class="count-big" id="repCount">0</div>
     <div class="count-lbl" id="repLbl">reps counted · target 10</div>
     <div class="feedback good" id="coachFeedback">Ready when you are.</div>
@@ -785,7 +801,7 @@ footer a{font-weight:700}
     <button class="pl-gear" onclick="openPlayerSettings()" aria-label="Coach and sound settings">⚙️</button>
   </div>
   <div class="player-body">
-    <div class="timer-ring" id="timerRing">
+    <div class="timer-ring" id="timerRing" role="button" tabindex="0" aria-label="Set done — tap or press Enter when you finish this set">
       <svg width="210" height="210" viewBox="0 0 210 210">
         <circle cx="105" cy="105" r="92" fill="none" stroke="#e2e9e6" stroke-width="11"/>
         <circle id="timerArc" cx="105" cy="105" r="92" fill="none" stroke="#0a6e57" stroke-width="11" stroke-linecap="round" stroke-dasharray="578" stroke-dashoffset="0"/>
@@ -898,7 +914,7 @@ footer a{font-weight:700}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <nav>
   <button class="on" data-view="home" onclick="showView('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home</button>
@@ -1005,12 +1021,15 @@ function savePlan(p){try{localStorage.setItem(LS_PLAN,JSON.stringify(p))}catch(e
 function restSecs(){var v=parseInt(localStorage.getItem(LS_REST)||"60",10);return isNaN(v)?60:v}
 function setRestSecs(v){try{localStorage.setItem(LS_REST,String(v))}catch(e){}}
 function logSession(name,minutes,reps,extra){
-  var l=loadLog(); var e={date:new Date().toISOString().slice(0,10),name:name,minutes:minutes,reps:reps||0,ts:Date.now()};
+  var l=loadLog(); var e={date:dayKey(new Date()),name:name,minutes:minutes,reps:reps||0,ts:Date.now()};
   if(extra)for(var k in extra)e[k]=extra[k];
   l.push(e);
-  saveLog(l); markChallengeDone(new Date().toISOString().slice(0,10)); renderHome(); renderLog();
+  saveLog(l); markChallengeDone(dayKey(new Date())); renderHome(); renderLog();
 }
-function dayKey(d){return d.toISOString().slice(0,10)}
+/* Local calendar date (yyyy-mm-dd). The old version used toISOString(),
+   which is UTC — a session logged 00:00–05:00 PKT landed on the wrong
+   day, and the water tracker reset at 05:00 PKT instead of midnight. */
+function dayKey(d){var m=d.getMonth()+1, dd=d.getDate(); return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd}
 function streak(){
   var l=loadLog(); if(!l.length) return 0;
   var days={}; l.forEach(function(s){days[s.date]=1});
@@ -1060,7 +1079,6 @@ function showView(name, fromPop){
   if(name==="log"){renderLog(); renderWeight(); renderWater(); renderReminderSettings(); renderSettingsCard();}
   if(name==="plan"){renderProfile(); if(!$("planOut").innerHTML)renderSavedPlan();}
   if(name==="running")renderRunAll();
-  if(name==="coach")stopCoach();
 }
 function goBack(){
   if(pushedStates>0){try{history.back();}catch(e){showView("home",true);}}
@@ -1911,10 +1929,13 @@ function renderPlayerStep(){
   } else if(p.mode==="rest"){
     $("plSub").textContent="Rest between sets";
     $("plStep").textContent="😮‍💨 Rest";
-    $("plInstr").textContent="Breathe. Shake it out. Next: "+(cur?cur.ex.name:"");
+    /* During rest idx still points at the finished step — the NEXT step
+       is p.steps[p.idx+1] (already computed as nxt above). Showing cur
+       here named the exercise just finished. */
+    $("plInstr").textContent="Breathe. Shake it out. Next: "+(nxt?nxt.ex.name:"Finish");
     $("plBig").textContent=fmtClock(p.remaining);
     $("plBigLbl").textContent="seconds of rest";
-    $("plNext").innerHTML="Up next: <b>"+esc(cur?cur.ex.name:"—")+"</b>";
+    $("plNext").innerHTML="Up next: <b>"+esc(nxt?nxt.ex.name:"Finish 🎉")+"</b>";
   } else if(p.mode==="step"){
     $("plSub").textContent="Step "+(p.idx+1)+" of "+p.total;
     $("plStep").textContent=cur.ex.name;
@@ -1990,14 +2011,24 @@ function togglePause(){
   $("plPauseBtn").innerHTML=p.paused?"▶ Resume":"⏸ Pause";
   if(p.mode==="step"&&p.steps[p.idx]&&p.steps[p.idx].type==="reps"&&!p.paused){/* rep steps wait on Set Done */}
 }
-function skipStep(){var p=player; if(!p)return; if(p.mode==="rest"){p.mode="step"; p.idx++; if(p.idx>=p.total){finishWorkout();return} var n=p.steps[p.idx]; p.remaining=n.type==="time"?n.seconds:0;} else {afterStepDoneSkip();} renderPlayerStep();}
+function skipStep(){var p=player; if(!p)return; if(p.mode==="rest"){p.mode="step"; p.idx++; if(p.idx>=p.total){finishWorkout(false);return} var n=p.steps[p.idx]; p.remaining=n.type==="time"?n.seconds:0;} else {afterStepDoneSkip();} renderPlayerStep();}
 function afterStepDoneSkip(){
   var p=player; p.idx++;
-  if(p.idx>=p.total){finishWorkout(); return}
+  if(p.idx>=p.total){finishWorkout(false); return}
   var n=p.steps[p.idx]; p.mode="step"; p.remaining=n.type==="time"?n.seconds:0;
 }
 /* "Set done" for rep steps: tap the big number */
 $("timerRing").addEventListener("click",function(){
+  var p=player; if(!p||p.mode!=="step")return;
+  var cur=p.steps[p.idx];
+  if(cur&&cur.type==="reps"){afterStepDone();}
+});
+/* Keyboard equivalent of the tap above. The ring is a div, so it needs an
+   explicit key handler — otherwise rep sets cannot be completed by
+   keyboard or screen reader. */
+$("timerRing").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  e.preventDefault();
   var p=player; if(!p||p.mode!=="step")return;
   var cur=p.steps[p.idx];
   if(cur&&cur.type==="reps"){afterStepDone();}
@@ -2083,7 +2114,7 @@ function openRestTimer(){
 }
 
 /* ================= AI COACH (CAMERA) ================= */
-var coach={active:false,landmarker:null,loading:false,raf:0,stream:null,exercise:"pushup",target:10,count:0,state:"up",minAngle:180,startTs:0,lastAngles:[],manual:0,manualStart:0,videoReady:false};
+var coach={active:false,landmarker:null,loading:false,raf:0,stream:null,exercise:"pushup",target:10,count:0,state:"up",minAngle:180,startTs:0,lastAngles:[],manual:0,manualStart:0,videoReady:false,primed:false};
 var POSE_LINKS=[[0,1],[1,2],[2,3],[3,7],[0,4],[4,5],[5,6],[6,8],[9,10],[11,12],[11,13],[13,15],[15,17],[15,19],[15,21],[17,19],[12,14],[14,16],[16,18],[16,20],[16,22],[18,20],[11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28],[27,29],[28,30],[29,31],[30,32],[27,31],[28,32]];
 function angleAt(a,b,c){
   var v1x=a.x-b.x, v1y=a.y-b.y, v2x=c.x-b.x, v2y=c.y-b.y;
@@ -2133,7 +2164,34 @@ function loadLandmarker(){
   });
   return coach.loading;
 }
+/* Permission primer + denied-state buttons (wired once at load). */
+$("camPrimerAllowBtn").onclick=function(){
+  try{localStorage.setItem("fitlife-coach-cam-primed","1")}catch(e){}
+  coach.primed=true;
+  $("camPrimer").classList.add("hidden");
+  startCoach();
+};
+$("camPrimerManualBtn").onclick=function(){
+  $("camPrimer").classList.add("hidden");
+  setFeedback("Manual counting — tap the circle for each rep.","good");
+  showManual();
+};
+$("camDeniedRetryBtn").onclick=function(){
+  $("camDenied").classList.add("hidden");
+  startCoach();
+};
 function startCoach(){
+  $("camDenied").classList.add("hidden");
+  /* First run: show the permission primer before the browser prompt.
+     Camera permission is granted by the user at first use — it can never
+     be granted automatically at install, so explain first, then ask. */
+  var primed=false;
+  try{primed=coach.primed||!!localStorage.getItem("fitlife-coach-cam-primed")}catch(e){primed=coach.primed}
+  if(!primed){
+    $("camPrimer").classList.remove("hidden");
+    setFeedback("Tap “Allow camera” below when you are ready.","good");
+    return;
+  }
   coach.exercise=chipVal("coachExChips")||"pushup";
   coach.target=Math.max(1,parseInt($("targetReps").value,10)||10);
   coach.count=0; coach.state="up"; coach.minAngle=180; coach.lastAngles=[]; coach.startTs=Date.now();
@@ -2151,12 +2209,36 @@ function startCoach(){
   // while the AI model loads in parallel in the background.
   navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false}).then(function(stream){
     coach.stream=stream; coach.active=true; coach.videoReady=false;
-    var v=$("camVideo"); v.srcObject=stream;
+    var v=$("camVideo");
+    // Attach the handler BEFORE setting srcObject: a fast stream can fire
+    // loadeddata before we are listening, and then videoReady stays false.
+    v.onloadeddata=function(){coach.videoReady=true; if(coach.landmarker)coachLoop();};
+    v.srcObject=stream;
     $("camOff").classList.add("hidden"); v.classList.remove("hidden"); $("camCanvas").classList.remove("hidden");
     $("camStartBtn").classList.add("hidden"); $("camStopBtn").classList.remove("hidden");
     $("camStartBtn").disabled=false;
     setFeedback("Camera on — loading AI rep counter…","good");
-    v.onloadeddata=function(){coach.videoReady=true; if(coach.landmarker)coachLoop();};
+    // Explicitly start playback. The <video> has no autoplay attribute and
+    // nothing ever called play(), so on iOS Safari and many Android browsers
+    // the preview stayed paused (black box) even with a live stream.
+    var playPromise=v.play();
+    if(playPromise&&playPromise.catch){
+      playPromise.catch(function(){
+        if(!coach.active)return;
+        setFeedback("Camera preview could not start — tap the preview once, or count manually below.","warn");
+        showManual();
+      });
+    }
+    // Safety net: if the preview still has not started a few seconds later
+    // (stalled stream / blocked playback), say so plainly instead of
+    // leaving the user staring at a black box.
+    setTimeout(function(){
+      if(!coach.active)return;
+      if(!coach.videoReady||v.paused){
+        setFeedback("Camera preview is not starting — check the camera permission, then tap Stop and try again, or count manually below.","warn");
+        showManual();
+      }
+    },6000);
     loadLandmarker().then(function(){
       if(!coach.active)return;
       setFeedback("Show your full body to the camera — side view works best.","good");
@@ -2170,7 +2252,11 @@ function startCoach(){
     $("camStartBtn").disabled=false;
     var msg;
     if(err&&err.name==="NotAllowedError"){
-      msg="Camera blocked — allow it in Settings → Apps → FitLife Coach → Permissions → Camera → Allow, then tap Start camera again.";
+      msg="Camera blocked — follow the steps below to turn it on, then tap “Enable camera”.";
+      /* Once denied, the browser will not show its prompt again until the
+         site permission is changed — the steps below (Android + iOS)
+         say exactly where, and the button re-attempts the request. */
+      $("camDenied").classList.remove("hidden");
     } else if(err&&err.name==="NotFoundError"){
       msg="No camera found on this device — use manual counting below.";
     } else {
@@ -2197,6 +2283,20 @@ function stopCoach(){
     bumpUsage(coach.exercise==="pushup"?"pushup":"squat");
     toast("Saved: "+coach.count+" "+(coach.exercise==="pushup"?"push-ups":"squats"));
     coach.count=0; $("repCount").textContent="0";
+  }
+  /* Manual reps are saved here too. showManual() is reached from the
+     landmarker failure, the play() failure and the 6 s timeout, and in
+     all of those paths "Stop & save" is visible — without this block
+     every manual rep was silently lost when the user tapped it.
+     (finishManual() resets coach.manual to 0 after saving, so a rep
+     saved with "Finish & save" is never logged twice here.) */
+  if(coach.manual>0){
+    var mmins=Math.max(1,Math.round((Date.now()-coach.manualStart)/60000));
+    var mname=coach.exercise==="pushup"?"AI Coach — Push-Ups (manual)":"AI Coach — Squats (manual)";
+    logSession(mname,mmins,coach.manual);
+    bumpUsage(coach.exercise==="pushup"?"pushup":"squat");
+    toast("Saved: "+coach.manual+" reps");
+    coach.manual=0; updateManualUI();
   }
   if($("manualPane"))$("manualPane").classList.add("hidden");
 }
@@ -2973,7 +3073,13 @@ function runWakeLock(on){
   }catch(e){}
 }
 function runStartCommon(mode,week,day,workout,label){
-  if(runT){if(runT.timerId)clearInterval(runT.timerId); runStopWatch(); runWakeLock(false); stopSpeech();}
+  if(runT){
+    /* A run is already in progress (running or paused) — never silently
+       discard it. A finished run has runT.finished set and is cleared
+       by runStop() a moment later, so it needs no confirm. */
+    if(!runT.finished&&!confirm("A run is in progress — discard it?"))return;
+    if(runT.timerId)clearInterval(runT.timerId); runStopWatch(); runWakeLock(false); stopSpeech();
+  }
   runT={mode:mode,week:week||0,day:day||0,workout:workout||null,label:label,status:"running",startTs:Date.now(),elapsedBase:0,segStart:Date.now(),distM:0,points:[],lastPos:null,kmAnnounced:0,segIdx:0,segKind:"walk",watchId:null,wl:null,timerId:null,finished:false,gpsState:"waiting",gpsMsg:"Waiting for GPS signal…"};
   runStartWatch();
   runWakeLock(true);
