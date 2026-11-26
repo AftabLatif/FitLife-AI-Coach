@@ -9,6 +9,36 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<!-- Google tag (gtag.js) - GA4, FitLife property G-8L61EM8TMD -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8L61EM8TMD"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-8L61EM8TMD');
+</script>
+<!-- Creator campaign tracking (Route A): capture ?ref= on landing, keep it for plan/install attribution -->
+<script>
+(function(){
+  try{
+    var ref=null;
+    try{ ref=new URLSearchParams(window.location.search).get('ref'); }catch(e){}
+    if(ref){
+      ref=String(ref).replace(/[^A-Za-z0-9_-]/g,'').slice(0,64);
+      if(ref){
+        try{ localStorage.setItem('fitlife_ref', ref); }catch(e){}
+        if(typeof gtag==='function'){ gtag('event','creator_visit',{creator_ref:ref}); }
+      }
+    }
+    window.addEventListener('appinstalled', function(){
+      try{
+        var r=null; try{ r=localStorage.getItem('fitlife_ref'); }catch(e){}
+        if(r && typeof gtag==='function'){ gtag('event','creator_install_prompt',{creator_ref:r}); }
+      }catch(e){}
+    });
+  }catch(e){}
+})();
+</script>
 <style>
 :root{
   --teal:#0a6e57; --teal-dark:#075640; --teal-mid:#0d8a6c; --teal-light:#e4f3ee;
@@ -1832,6 +1862,7 @@ function generatePlan(){
     usedAll=usedAll.concat(used);
   });
   savePlan(plan); renderPlan(plan);
+  try{ var _ref=localStorage.getItem('fitlife_ref'); if(_ref && typeof gtag==='function'){ gtag('event','creator_plan',{creator_ref:_ref}); } }catch(e){}
   toast("Your "+days+"-day plan is ready");
   $("planOut").scrollIntoView({behavior:"smooth"});
 }
